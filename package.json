@@ -1,0 +1,31 @@
+{
+  "name": "dbd-streak-overlay",
+  "version": "0.1.0",
+  "description": "Electron/Vite OBS overlay with dock editor and auto-update",
+  "main": "electron/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "start": "electron .",
+    "build": "vite build",
+    "test": "node scripts/test.js"
+  },
+  "dependencies": {
+    "electron-updater": "^6.1.1",
+    "express": "^4.19.2",
+    "obs-websocket-js": "^5.0.4",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "electron": "^30.0.1",
+    "vite": "^5.4.6"
+  },
+  "build": {
+    "appId": "com.example.obsdock",
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ]
+  }
+}
