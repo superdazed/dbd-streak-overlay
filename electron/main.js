@@ -1,10 +1,9 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import OBSWebSocket from 'obs-websocket-js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
@@ -37,33 +36,37 @@ wss.on('connection', ws => {
   });
 });
 
-async function createObsItems() {
-  const obs = new OBSWebSocket();
-  try {
-    await obs.connect('ws://127.0.0.1:4455', process.env.OBS_PASSWORD || '');
-    const sourceUrl = `http://localhost:${PORT}/source.html`;
-    const dockUrl = `http://localhost:${PORT}/dock.html`;
-    await obs.call('CreateInput', {
-      inputName: 'Electron Text Source',
-      inputKind: 'browser_source',
-      sceneName: 'Scene',
-      inputSettings: { url: sourceUrl }
-    });
-    await obs.call('CreateCustomDock', {
-      dockName: 'Electron Text Dock',
-      url: dockUrl
-    });
-  } catch (err) {
-    console.error('Could not create OBS items', err);
+let instructionsWin;
+function createInstructionsWindow() {
+  if (instructionsWin) {
+    instructionsWin.focus();
+    return;
   }
+  instructionsWin = new BrowserWindow({
+    width: 400,
+    height: 300
+  });
+  instructionsWin.loadURL(`http://localhost:${PORT}/instructions.html`);
+  instructionsWin.on('closed', () => {
+    instructionsWin = null;
+  });
 }
 
 app.whenReady().then(() => {
   autoUpdater.checkForUpdatesAndNotify();
-  createObsItems();
-  const win = new BrowserWindow({ show: false });
+  const icon = nativeImage.createFromDataURL(
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAAQ0lEQVR42mNkYGA4weEeI8P+L5BkYGBg+MH4PyOB//8fEMHqBjiOGCFAjPACGmj7gAWuYKYD8Sw0jYWNgF6YGBC4TGFAEAI/yFF0/fyB0AAAAASUVORK5CYII='
+  );
+  const tray = new Tray(icon);
+  tray.setToolTip('DBD Streak Overlay');
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Show Instructions', click: () => createInstructionsWindow() },
+    { type: 'separator' },
+    { label: 'Quit', click: () => app.quit() }
+  ]);
+  tray.setContextMenu(contextMenu);
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+app.on('window-all-closed', e => {
+  e.preventDefault();
 });
