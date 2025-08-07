@@ -1,4 +1,8 @@
 import { defineConfig } from 'vite';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   root: 'src',
@@ -6,8 +10,9 @@ export default defineConfig({
     outDir: '../dist',
     rollupOptions: {
       input: {
-        dock: 'dock.html',
-        source: 'source.html'
+        dock: path.resolve(__dirname, 'src/dock.html'),
+        source: path.resolve(__dirname, 'src/source.html'),
+        instructions: path.resolve(__dirname, 'src/instructions.html')
       }
     }
   }
