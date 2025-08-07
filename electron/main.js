@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import pkg from 'electron-updater';
+const { autoUpdater } = pkg;
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import path from 'node:path';
