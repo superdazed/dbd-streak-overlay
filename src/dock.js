@@ -3,6 +3,10 @@ const input = document.getElementById('text-input');
 
 ws.addEventListener('message', ev => {
   const data = JSON.parse(ev.data);
+  if (data.type === 'reload') {
+    location.reload();
+    return;
+  }
   if (data.type === 'update' && document.activeElement !== input) {
     input.value = data.text || '';
   }

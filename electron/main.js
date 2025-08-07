@@ -5,6 +5,8 @@ import express from 'express';
 import { WebSocketServer } from 'ws';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import chokidar from 'chokidar';
+import { exec } from 'node:child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
@@ -36,6 +38,31 @@ wss.on('connection', ws => {
     }
   });
 });
+
+// Rebuild and reload clients on source changes during development
+if (!app.isPackaged) {
+  const build = reload => {
+    exec('npm run build', (err, stdout, stderr) => {
+      if (err) {
+        console.error(stderr || err);
+        return;
+      }
+      if (reload) {
+        wss.clients.forEach(client => {
+          client.send(JSON.stringify({ type: 'reload' }));
+        });
+      }
+    });
+  };
+
+  // Initial build without triggering a reload
+  build(false);
+
+  const watcher = chokidar.watch(path.join(__dirname, '../src'), {
+    ignoreInitial: true
+  });
+  watcher.on('all', () => build(true));
+}
 
 let instructionsWin;
 function createInstructionsWindow() {
