@@ -1,6 +1,6 @@
 {
   "name": "dbd-streak-overlay",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "author": "Superdazed",
   "repository": "superdazed/dbd-streak-overlay",
   "description": "A tool for Dead by Daylight streamers to create and manage winstreak overlays",
