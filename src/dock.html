@@ -2,10 +2,35 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Text Dock</title>
+    <title>Streak Dock</title>
+    <style>
+      body { font-family: sans-serif; padding: 10px; }
+      #settings label { display: block; margin-bottom: 4px; }
+      .streak { border: 1px solid #ccc; padding: 5px; margin-bottom: 8px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+      .streak.dragging { opacity: 0.5; }
+      .streak select, .streak input { margin-right: 4px; }
+      .streak .delete { margin-left: auto; }
+      #streak-list { margin-top: 10px; }
+      button { cursor: pointer; }
+    </style>
   </head>
   <body>
-    <input id="text-input" placeholder="Type text" />
+    <div id="settings">
+      <h3>Global Settings</h3>
+      <label>Font Face
+        <select id="font-face"></select>
+      </label>
+      <label>Font Size
+        <input id="font-size" type="number" min="1" />
+      </label>
+      <label>Font Color
+        <input id="font-color" type="color" />
+      </label>
+    </div>
+    <hr />
+    <button id="add-streak">Add Streak</button>
+    <div id="streak-list"></div>
+    <button id="update-overlay">Update Overlay</button>
     <script type="module" src="/dock.js"></script>
   </body>
 </html>

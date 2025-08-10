@@ -10,7 +10,7 @@ import { exec } from 'node:child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
-let latestText = '';
+let latestData = null;
 
 // Serve static files built by Vite
 const staticPath = path.join(__dirname, '../dist');
@@ -23,14 +23,14 @@ const server = appServer.listen(PORT, () => {
 // WebSocket for dock/source communication
 const wss = new WebSocketServer({ server });
 wss.on('connection', ws => {
-  ws.send(JSON.stringify({ type: 'update', text: latestText }));
+  ws.send(JSON.stringify({ type: 'update', data: latestData }));
   ws.on('message', data => {
     try {
       const msg = JSON.parse(data);
       if (msg.type === 'update') {
-        latestText = msg.text;
+        latestData = msg.data;
         wss.clients.forEach(client => {
-          client.send(JSON.stringify({ type: 'update', text: latestText }));
+          client.send(JSON.stringify({ type: 'update', data: latestData }));
         });
       }
     } catch (e) {
