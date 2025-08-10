@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage } from 'electron';
+import { app, BrowserWindow, Tray, Menu, nativeImage, dialog } from 'electron';
 import pkg from 'electron-updater';
 const { autoUpdater } = pkg;
 import express from 'express';
@@ -118,7 +118,26 @@ function createInstructionsWindow() {
 app.whenReady().then(() => {
   // Ensure Windows uses the packaged app icon for taskbar grouping and shortcuts
   app.setAppUserModelId('com.superdazed.dbd-streak-overlay');
-  autoUpdater.checkForUpdatesAndNotify();
+
+  // Custom update prompts
+  autoUpdater.on('update-downloaded', (_evt, _notes, releaseName) => {
+    const dialogOpts = {
+      type: 'info',
+      buttons: ['Restart now', 'Later'],
+      title: 'Update ready',
+      message: releaseName || 'A new update is ready to install',
+      detail: 'The update has finished downloading. Restart to apply it now.'
+    };
+    dialog.showMessageBox(dialogOpts).then(result => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+  });
+  autoUpdater.on('error', err => {
+    console.error('Auto update error:', err);
+  });
+  autoUpdater.checkForUpdates();
   tray = new Tray(getIconPath());
   tray.setToolTip('Streak Overlay for Dead by Daylight');
   const contextMenu = Menu.buildFromTemplate([
