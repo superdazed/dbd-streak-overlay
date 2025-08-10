@@ -119,14 +119,14 @@ app.whenReady().then(() => {
   // Ensure Windows uses the packaged app icon for taskbar grouping and shortcuts
   app.setAppUserModelId('com.superdazed.dbd-streak-overlay');
 
+  // Custom update prompts
   autoUpdater.on('update-downloaded', (_evt, _notes, releaseName) => {
     const dialogOpts = {
       type: 'info',
-      buttons: ['Restart', 'Later'],
-      title: 'Update available',
-      message: process.platform === 'win32' ? releaseNotes : releaseName,
-      detail:
-        'A new version of Streak Overlay for Dead by Daylight has been downloaded. Restart to apply the update.'
+      buttons: ['Restart now', 'Later'],
+      title: 'Update ready',
+      message: 'Streak Overlay for Dead by Daylight',
+      detail: 'An new version of Streak Overlay for Dead by Daylight is ready to install. Restart to apply the update.'
     };
     dialog.showMessageBox(dialogOpts).then(result => {
       if (result.response === 0) {
