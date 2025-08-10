@@ -146,6 +146,9 @@ app.whenReady().then(() => {
     { label: 'Quit', click: () => app.quit() }
   ]);
   tray.setContextMenu(contextMenu);
+  tray.on('double-click', () => {
+    createInstructionsWindow();
+  });
 
   // Show instructions the very first time the app is launched after install
   if (app.isPackaged && isFirstRun()) {
