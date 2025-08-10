@@ -16,6 +16,18 @@ let latestData = null;
 const staticPath = path.join(__dirname, '../renderer');
 const appServer = express();
 appServer.use(express.static(staticPath));
+// Manual update check triggered from renderer
+appServer.post('/api/check-updates', async (_req, res) => {
+  try {
+    const currentVersion = app.getVersion();
+    const result = await autoUpdater.checkForUpdates();
+    const latestVersion = result?.updateInfo?.version || null;
+    const updateAvailable = Boolean(latestVersion && latestVersion !== currentVersion);
+    res.json({ ok: true, updateAvailable, currentVersion, latestVersion });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: String(error) });
+  }
+});
 // Expose app version for renderer pages
 appServer.get('/version', (_req, res) => {
   try {
