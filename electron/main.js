@@ -119,14 +119,13 @@ app.whenReady().then(() => {
   // Ensure Windows uses the packaged app icon for taskbar grouping and shortcuts
   app.setAppUserModelId('com.superdazed.dbd-streak-overlay');
 
-  // Custom update prompts
   autoUpdater.on('update-downloaded', (_evt, _notes, releaseName) => {
     const dialogOpts = {
       type: 'info',
       buttons: ['Restart now', 'Later'],
       title: 'Update ready',
       message: releaseName || 'A new update is ready to install',
-      detail: 'The update has finished downloading. Restart to apply it now.'
+      detail: 'An update has been downloaded and will be installed when you next launch the app.'
     };
     dialog.showMessageBox(dialogOpts).then(result => {
       if (result.response === 0) {
