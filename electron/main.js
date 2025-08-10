@@ -122,10 +122,11 @@ app.whenReady().then(() => {
   autoUpdater.on('update-downloaded', (_evt, _notes, releaseName) => {
     const dialogOpts = {
       type: 'info',
-      buttons: ['Restart now', 'Later'],
-      title: 'Update ready',
-      message: releaseName || 'A new update is ready to install',
-      detail: 'An update has been downloaded and will be installed when you next launch the app.'
+      buttons: ['Restart', 'Later'],
+      title: 'Update available',
+      message: process.platform === 'win32' ? releaseNotes : releaseName,
+      detail:
+        'A new version of Streak Overlay for Dead by Daylight has been downloaded. Restart to apply the update.'
     };
     dialog.showMessageBox(dialogOpts).then(result => {
       if (result.response === 0) {
