@@ -87,7 +87,7 @@ if (!app.isPackaged) {
   })().catch(err => console.error('Dev watcher init failed', err));
 }
 
-let instructionsWin;
+let aboutWin;
 let tray;
 
 function getIconPath() {
@@ -109,21 +109,23 @@ function isFirstRun() {
     return false;
   }
 }
-function createInstructionsWindow() {
-  if (instructionsWin) {
-    instructionsWin.focus();
+function createAboutWindow() {
+  if (aboutWin) {
+    aboutWin.focus();
     return;
   }
-  instructionsWin = new BrowserWindow({
-    width: 400,
-    height: 300,
+  aboutWin = new BrowserWindow({
+    width: 700,
+    height: 520,
+    minWidth: 500,
+    minHeight: 380,
     autoHideMenuBar: true,
     icon: getIconPath()
   });
-  instructionsWin.setMenuBarVisibility(false);
-  instructionsWin.loadURL(`http://localhost:${PORT}/instructions.html`);
-  instructionsWin.on('closed', () => {
-    instructionsWin = null;
+  aboutWin.setMenuBarVisibility(false);
+  aboutWin.loadURL(`http://localhost:${PORT}/about.html`);
+  aboutWin.on('closed', () => {
+    aboutWin = null;
   });
 }
 
@@ -153,18 +155,18 @@ app.whenReady().then(() => {
   tray = new Tray(getIconPath());
   tray.setToolTip('Streak Overlay for Dead by Daylight');
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Show Instructions', click: () => createInstructionsWindow() },
+    { label: 'About', click: () => createAboutWindow() },
     { type: 'separator' },
     { label: 'Quit', click: () => app.quit() }
   ]);
   tray.setContextMenu(contextMenu);
   tray.on('double-click', () => {
-    createInstructionsWindow();
+    createAboutWindow();
   });
 
   // Show instructions the very first time the app is launched after install
   if (app.isPackaged && isFirstRun()) {
-    createInstructionsWindow();
+    createAboutWindow();
   }
 });
 

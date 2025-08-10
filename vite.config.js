@@ -13,7 +13,7 @@ export default defineConfig({
       input: {
         dock: path.resolve(__dirname, 'src/dock.html'),
         source: path.resolve(__dirname, 'src/source.html'),
-        instructions: path.resolve(__dirname, 'src/instructions.html')
+        about: path.resolve(__dirname, 'src/about.html')
       }
     }
   }
