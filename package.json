@@ -35,9 +35,9 @@
       }
     ],
     "win": {
-      "signAndEditExecutable": false,
+      "signAndEditExecutable": true,
       "icon": "build/icon.ico",
-      "artifactName": "${productName} ${version} - Setup.${ext}",
+      "artifactName": "DBDStreakOverlay (${version}) Installer.${ext}",
       "executableName": "DBDStreakOverlay"
     },
     "nsis": {
@@ -51,6 +51,7 @@
         "from": "build/icon.ico",
         "to": "icons/icon.ico"
       }
-    ]
+    ],
+    "copyright": "Copyright (c) Superdazed"
   }
 }

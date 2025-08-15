@@ -29,12 +29,22 @@
   <script>
     document.getElementById('check-updates').addEventListener('click', () => {
       fetch('/api/check-updates', { method: 'POST' })
-        .then(r => r.json())
-        .then(({ ok, updateAvailable, latestVersion }) => {
-          if (!ok) return alert('Failed to check for updates');
+        .then(async r => {
+          let body = null;
+          try { body = await r.json(); } catch {}
+          if (!r.ok || (body && body.ok === false)) {
+            const msg = (body && (body.error || body.message)) || `HTTP ${r.status} ${r.statusText}`;
+            throw new Error(msg);
+          }
+          return body;
+        })
+        .then(({ updateAvailable, latestVersion }) => {
           alert(updateAvailable ? `Update available: v${latestVersion}` : 'You are on the latest version.');
         })
-        .catch(() => alert('Failed to check for updates'));
+        .catch(err => {
+          const message = err && err.message ? err.message : String(err || 'Unknown error');
+          alert(`Failed to check for updates:\n${message}`);
+        });
     });
     fetch('/version')
       .then(r => r.json())
