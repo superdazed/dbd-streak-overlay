@@ -1,6 +1,6 @@
 import charactersJson from './characters.json';
 
-const ws = new WebSocket('ws://localhost:3000');
+const ws = new WebSocket(`ws://${window.location.host}`);
 const display = document.getElementById('display');
 
 // Eagerly import character images so Vite copies them to dist and gives us URLs
