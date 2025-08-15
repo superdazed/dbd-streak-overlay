@@ -1,5 +1,5 @@
 import charactersJson from './characters.json';
-const ws = new WebSocket('ws://localhost:3000');
+const ws = new WebSocket(`ws://${window.location.host}`);
 let characters = { killers: [], survivors: [] };
 
 function normalizeCharacterData(raw) {

@@ -7,9 +7,20 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { exec } from 'node:child_process';
 import fs from 'node:fs';
+const gotTheLock = app.requestSingleInstanceLock();
 
+if (!gotTheLock) {
+  app.whenReady().then(() => {
+    dialog.showMessageBoxSync({
+      type: 'warning',
+      title: 'Already running',
+      message: 'Streak Overlay is already running.'
+    });
+    app.quit();
+  });
+} else {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PORT = 3000;
+let port = 3000;
 let latestData = null;
 
 // Serve static files built by Vite (separate from electron-builder output)
@@ -36,8 +47,18 @@ appServer.get('/version', (_req, res) => {
     res.status(500).json({ version: null });
   }
 });
-const server = appServer.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+function logAddress() {
+  port = server.address().port;
+  console.log(`Server running at http://localhost:${port}`);
+}
+
+const server = appServer.listen(port, logAddress);
+server.on('error', err => {
+  if (err.code === 'EADDRINUSE') {
+    server.listen(0, logAddress);
+  } else {
+    console.error('Server error:', err);
+  }
 });
 
 // WebSocket for dock/source communication
@@ -123,7 +144,7 @@ function createAboutWindow() {
     icon: getIconPath()
   });
   aboutWin.setMenuBarVisibility(false);
-  aboutWin.loadURL(`http://localhost:${PORT}/about.html`);
+  aboutWin.loadURL(`http://localhost:${port}/about.html`);
   aboutWin.on('closed', () => {
     aboutWin = null;
   });
@@ -173,3 +194,4 @@ app.whenReady().then(() => {
 app.on('window-all-closed', e => {
   e.preventDefault();
 });
+}
