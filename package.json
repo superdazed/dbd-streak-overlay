@@ -37,7 +37,8 @@
     "win": {
       "signAndEditExecutable": false,
       "icon": "build/icon.ico",
-      "artifactName": "${productName} ${version} - Setup.${ext}"
+      "artifactName": "${productName} ${version} - Setup.${ext}",
+      "executableName": "DBDStreakOverlay"
     },
     "nsis": {
       "shortcutName": "Streak Overlay for Dead by Daylight",

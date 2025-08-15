@@ -13,8 +13,8 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     dialog.showMessageBoxSync({
       type: 'warning',
-      title: 'Already running',
-      message: 'Streak Overlay is already running.'
+      title: 'Streak Overlay for Dead by Daylight',
+      message: 'Streak Overlay for Dead by Daylight is already running. Check the tray for the app.'
     });
     app.quit();
   });
@@ -27,6 +27,16 @@ let latestData = null;
 const staticPath = path.join(__dirname, '../renderer');
 const appServer = express();
 appServer.use(express.static(staticPath));
+// Friendly extensionless routes for OBS users
+appServer.get('/source', (_req, res) => {
+  res.sendFile(path.join(staticPath, 'source.html'));
+});
+appServer.get('/dock', (_req, res) => {
+  res.sendFile(path.join(staticPath, 'dock.html'));
+});
+appServer.get('/about', (_req, res) => {
+  res.sendFile(path.join(staticPath, 'about.html'));
+});
 // Manual update check triggered from renderer
 appServer.post('/api/check-updates', async (_req, res) => {
   try {
@@ -117,19 +127,6 @@ function getIconPath() {
   return fs.existsSync(packagedIcon) ? packagedIcon : devIcon;
 }
 
-function isFirstRun() {
-  try {
-    const flagPath = path.join(app.getPath('userData'), 'first-run');
-    if (fs.existsSync(flagPath)) {
-      return false;
-    }
-    fs.writeFileSync(flagPath, new Date().toISOString(), { encoding: 'utf-8' });
-    return true;
-  } catch (error) {
-    console.error('First-run check failed', error);
-    return false;
-  }
-}
 function createAboutWindow() {
   if (aboutWin) {
     aboutWin.focus();
@@ -137,14 +134,14 @@ function createAboutWindow() {
   }
   aboutWin = new BrowserWindow({
     width: 700,
-    height: 520,
+    height: 620,
     minWidth: 500,
     minHeight: 380,
     autoHideMenuBar: true,
     icon: getIconPath()
   });
   aboutWin.setMenuBarVisibility(false);
-  aboutWin.loadURL(`http://localhost:${port}/about.html`);
+  aboutWin.loadURL(`http://localhost:${port}/about`);
   aboutWin.on('closed', () => {
     aboutWin = null;
   });
@@ -185,10 +182,8 @@ app.whenReady().then(() => {
     createAboutWindow();
   });
 
-  // Show instructions the very first time the app is launched after install
-  if (app.isPackaged && isFirstRun()) {
-    createAboutWindow();
-  }
+  // Show About window on every launch
+  createAboutWindow();
 });
 
 app.on('window-all-closed', e => {

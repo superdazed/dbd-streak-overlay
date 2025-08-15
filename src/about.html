@@ -1,26 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <title>About - Streak Overlay for Dead by Daylight</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    code { background-color: #f0f0f0; padding: 2px 4px; }
-    footer { margin-top: 24px; color: #666; font-size: 12px; }
+    code { background-color: rgba(255,255,255,.1); padding: 2px 4px; border-radius: 2px; }
   </style>
   </head>
 <body>
-  <h1>About</h1>
-  <p>Streak Overlay for Dead by Daylight helps streamers create and manage win-streak overlays.</p>
-  <p>OBS setup:</p>
-  <ol>
-    <li>Add a <strong>Browser Source</strong> with the URL <code id="source-url"></code>.</li>
-    <li>Add a <strong>Custom Browser Dock</strong> with the URL <code id="dock-url"></code>.</li>
-  </ol>
-  <button id="check-updates">Check for updates</button>
-  <footer>
-    Version: <span id="app-version">loading…</span>
-  </footer>
+  <div class="container py-3">
+    <h1 class="mb-3">About</h1>
+    <p>Streak Overlay for Dead by Daylight helps streamers create and manage win-streak overlays.</p>
+    <p class="text-body-secondary">Closing this window will minimize the app to the tray. To quit the app, open the tray icon and click "Quit".</p>
+    <h6 class="mt-4">OBS setup</h6>
+    <ol class="mb-3">
+      <li>Add a <strong>Browser Source</strong> with the URL <code id="source-url"></code>.</li>
+      <li>Add a <strong>Custom Browser Dock</strong> (under the "Tools" menu) with the URL <code id="dock-url"></code>.</li>
+    </ol>
+    <p class="text-body-secondary">If OBS was already open when you started the app, you may need to refresh the browser source and dock in OBS. To refresh the browser source, select the source and click "Refresh" in the actions menu. To refresh the browser dock, right-click anywhere in the dock and select "Refresh".</p>
+    <div class="mt-3">
+      <button id="check-updates" class="btn btn-primary">Check for updates</button>
+    </div>
+    <footer class="mt-4 small text-body-secondary">
+      Version: <span id="app-version">loading…</span>
+    </footer>
+  </div>
   <script>
     document.getElementById('check-updates').addEventListener('click', () => {
       fetch('/api/check-updates', { method: 'POST' })
@@ -40,9 +45,10 @@
         document.getElementById('app-version').textContent = 'unknown';
       });
     const port = location.port;
-    document.getElementById('source-url').textContent = `http://localhost:${port}/source.html`;
-    document.getElementById('dock-url').textContent = `http://localhost:${port}/dock.html`;
+    document.getElementById('source-url').textContent = `http://localhost:${port}/source`;
+    document.getElementById('dock-url').textContent = `http://localhost:${port}/dock`;
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 
