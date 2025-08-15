@@ -24,6 +24,10 @@ You can setup streaks via the dock.
 5. Optionally, in "Record/Target Value", enter a value for the target/record badge.
 6. Click the "+" button to increase the streak value by one. If the streak value is the same as the target value, the target value will also increase by one.
 
+## Customizing the design
+
+In the dock, click "Settings". You change the font style, font size, and font color. To resize the whole overlay, transform the source in OBS.
+
 ## Third Party Legal Notices
 
 DEAD BY DAYLIGHT™ is a registered trademark or trademark of Behaviour Interactive Inc.
