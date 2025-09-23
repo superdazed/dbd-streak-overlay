@@ -343,6 +343,11 @@
       "type": "killer"
     },
     {
+      "name": "The Krasue",
+      "image": "the-krasue",
+      "type": "killer"
+    },
+    {
       "name": "The Legion",
       "image": "the-legion",
       "type": "killer"
