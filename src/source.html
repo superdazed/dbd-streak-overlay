@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Streak Source</title>
+    <style>
+      body { background: transparent; margin: 0; }
+      #display {
+        padding: 4px;
+        display: inline-block;
+        width: max-content;
+      }
+      .streak-row {
+        display: flex;
+        align-items: center;
+        gap: 10px; /* image -> label gap */
+        margin-bottom: 8px;
+      }
+      .avatar { width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; }
+      .avatar img { width: 120px; height: 120px; display: block; }
+      .label { display: inline-block; min-width: var(--labelWidth, 0px); font-weight: 300; }
+      .streak-row.no-avatar .label { margin-left: var(--nameOffset, 0px); }
+      .count-area { display: inline-flex; align-items: center; margin-left: 14px; min-width: var(--countColumnWidth, 0px); justify-content: flex-start; }
+      .count-area .count { font-weight: 500; }
+      .badge {
+        margin-left: 12px;
+        padding: 4px 8px;
+        border-radius: 2px;
+        background: rgba(0,0,0,0.5);
+        font-size: 0.4em;
+      }
+      .scoreboard {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin-bottom: 16px;
+        width: fit-content;
+        min-width: fit-content;
+      }
+      .scoreboard-title {
+        padding: 12px 20px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 1.1em;
+        color: #ffffff;
+        text-shadow: none;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 8px;
+      }
+      .scoreboard-main {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        padding: 20px 32px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .scoreboard-team-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-width: 120px;
+      }
+      .scoreboard-team-name {
+        font-size: 1em;
+        font-weight: 400;
+        color: #ffffff;
+        text-align: center;
+        text-shadow: none;
+      }
+      .scoreboard-team-score {
+        font-size: 2em;
+        font-weight: 700;
+        color: #ffffff;
+        text-align: center;
+        text-shadow: none;
+      }
+      .scoreboard-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+      }
+      .scoreboard-icon img {
+        max-width: 60px;
+        max-height: 60px;
+        object-fit: contain;
+      }
+      .scoreboard-win-condition {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 12px 20px;
+        width: 100%;
+        box-sizing: border-box;
+        text-align: center;
+      }
+      .scoreboard-win-label {
+        font-size: 0.75em;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.7);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        text-shadow: none;
+        text-align: center;
+      }
+      .scoreboard-win-value {
+        font-size: 1em;
+        font-weight: 400;
+        color: #ffffff;
+        text-shadow: none;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="display"></div>
+    <script type="module" src="/source.js"></script>
+  </body>
+</html>

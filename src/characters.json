@@ -1,0 +1,451 @@
+{
+  "survivor": [
+    {
+      "name": "Ace Visconti",
+      "image": "ace-visconti",
+      "type": "survivor"
+    },
+    {
+      "name": "Ada Wong",
+      "image": "ada-wong",
+      "type": "survivor"
+    },
+    {
+      "name": "Adam Francis",
+      "image": "adam-francis",
+      "type": "survivor"
+    },
+    {
+      "name": "Alan Wake",
+      "image": "alan-wake",
+      "type": "survivor"
+    },
+    {
+      "name": "Ash Williams",
+      "image": "ash-williams",
+      "type": "survivor"
+    },
+    {
+      "name": "Bill Overbeck",
+      "image": "bill-overbeck",
+      "type": "survivor"
+    },
+    {
+      "name": "Cheryl Mason",
+      "image": "cheryl-mason",
+      "type": "survivor"
+    },
+    {
+      "name": "Claudette Morel",
+      "image": "claudette-morel",
+      "type": "survivor"
+    },
+    {
+      "name": "David King",
+      "image": "david-king",
+      "type": "survivor"
+    },
+    {
+      "name": "David Tapp",
+      "image": "david-tapp",
+      "type": "survivor"
+    },
+    {
+      "name": "Dwight Fairfield",
+      "image": "dwight-fairfield",
+      "type": "survivor"
+    },
+    {
+      "name": "Ellen Ripley",
+      "image": "ellen-ripley",
+      "type": "survivor"
+    },
+    {
+      "name": "Elodie Rakoto",
+      "image": "elodie-rakoto",
+      "type": "survivor"
+    },
+    {
+      "name": "Felix Richter",
+      "image": "felix-richter",
+      "type": "survivor"
+    },
+    {
+      "name": "Feng Min",
+      "image": "feng-min",
+      "type": "survivor"
+    },
+    {
+      "name": "Gabriel Soma",
+      "image": "gabriel-soma",
+      "type": "survivor"
+    },
+    {
+      "name": "Haddie Kaur",
+      "image": "haddie-kaur",
+      "type": "survivor"
+    },
+    {
+      "name": "Jake Park",
+      "image": "jake-park",
+      "type": "survivor"
+    },
+    {
+      "name": "Jane Romero",
+      "image": "jane-romero",
+      "type": "survivor"
+    },
+    {
+      "name": "Jeff Johansen",
+      "image": "jeff-johansen",
+      "type": "survivor"
+    },
+    {
+      "name": "Jill Valentine",
+      "image": "jill-valentine",
+      "type": "survivor"
+    },
+    {
+      "name": "Jonah Vasquez",
+      "image": "jonah-vasquez",
+      "type": "survivor"
+    },
+    {
+      "name": "Kate Denson",
+      "image": "kate-denson",
+      "type": "survivor"
+    },
+    {
+      "name": "Lara Croft",
+      "image": "lara-croft",
+      "type": "survivor"
+    },
+    {
+      "name": "Laurie Strode",
+      "image": "laurie-strode",
+      "type": "survivor"
+    },
+    {
+      "name": "Leon Scott Kennedy",
+      "image": "leon-scott-kennedy",
+      "type": "survivor"
+    },
+    {
+      "name": "Meg Thomas",
+      "image": "meg-thomas",
+      "type": "survivor"
+    },
+    {
+      "name": "Michonne Grimes",
+      "image": "michonne-grimes",
+      "type": "survivor"
+    },
+    {
+      "name": "Mikaela Reid",
+      "image": "mikaela-reid",
+      "type": "survivor"
+    },
+    {
+      "name": "Nancy Wheeler",
+      "image": "nancy-wheeler",
+      "type": "survivor"
+    },
+    {
+      "name": "Nea Karlsson",
+      "image": "nea-karlsson",
+      "type": "survivor"
+    },
+    {
+      "name": "Nicolas Cage",
+      "image": "nicolas-cage",
+      "type": "survivor"
+    },
+    {
+      "name": "Orela Rose",
+      "image": "orela-rose",
+      "type": "survivor"
+    },
+    {
+      "name": "Quentin Smith",
+      "image": "quentin-smith",
+      "type": "survivor"
+    },
+    {
+      "name": "Rebecca Chambers",
+      "image": "rebecca-chambers",
+      "type": "survivor"
+    },
+    {
+      "name": "Renato Lyra",
+      "image": "renato-lyra",
+      "type": "survivor"
+    },
+    {
+      "name": "Rick Grimes",
+      "image": "rick-grimes",
+      "type": "survivor"
+    },
+    {
+      "name": "Sable Ward",
+      "image": "sable-ward",
+      "type": "survivor"
+    },
+    {
+      "name": "Steve Harrington",
+      "image": "steve-harrington",
+      "type": "survivor"
+    },
+    {
+      "name": "Taurie Cain",
+      "image": "taurie-cain",
+      "type": "survivor"
+    },
+    {
+      "name": "Thalita Lyra",
+      "image": "thalita-lyra",
+      "type": "survivor"
+    },
+    {
+      "name": "The Troupe",
+      "image": "the-troupe",
+      "type": "survivor"
+    },
+    {
+      "name": "Trevor Belmont",
+      "image": "trevor-belmont",
+      "type": "survivor"
+    },
+    {
+      "name": "Vittorio Toscano",
+      "image": "vittorio-toscano",
+      "type": "survivor"
+    },
+    {
+      "name": "Yoichi Asakawa",
+      "image": "yoichi-asakawa",
+      "type": "survivor"
+    },
+    {
+      "name": "Yui Kimura",
+      "image": "yui-kimura",
+      "type": "survivor"
+    },
+    {
+      "name": "Yunjin Lee",
+      "image": "yunjin-lee",
+      "type": "survivor"
+    },
+    {
+      "name": "Zarina Kassir",
+      "image": "zarina-kassir",
+      "type": "survivor"
+    }
+  ],
+  "killer": [
+    {
+      "name": "The Animatronic",
+      "image": "the-animatronic",
+      "type": "killer"
+    },
+    {
+      "name": "The Artist",
+      "image": "the-artist",
+      "type": "killer"
+    },
+    {
+      "name": "The Blight",
+      "image": "the-blight",
+      "type": "killer"
+    },
+    {
+      "name": "The Cannibal",
+      "image": "the-cannibal",
+      "type": "killer"
+    },
+    {
+      "name": "The Cenobite",
+      "image": "the-cenobite",
+      "type": "killer"
+    },
+    {
+      "name": "The Clown",
+      "image": "the-clown",
+      "type": "killer"
+    },
+    {
+      "name": "The Dark Lord",
+      "image": "the-dark-lord",
+      "type": "killer"
+    },
+    {
+      "name": "The Deathslinger",
+      "image": "the-deathslinger",
+      "type": "killer"
+    },
+    {
+      "name": "The Demogorgon",
+      "image": "the-demogorgon",
+      "type": "killer"
+    },
+    {
+      "name": "The Doctor",
+      "image": "the-doctor",
+      "type": "killer"
+    },
+    {
+      "name": "The Dredge",
+      "image": "the-dredge",
+      "type": "killer"
+    },
+    {
+      "name": "The Executioner",
+      "image": "the-executioner",
+      "type": "killer"
+    },
+    {
+      "name": "The Ghost Face",
+      "image": "the-ghost-face",
+      "type": "killer"
+    },
+    {
+      "name": "The Ghoul",
+      "image": "the-ghoul",
+      "type": "killer"
+    },
+    {
+      "name": "The Good Guy",
+      "image": "the-good-guy",
+      "type": "killer"
+    },
+    {
+      "name": "The Hag",
+      "image": "the-hag",
+      "type": "killer"
+    },
+    {
+      "name": "The Hillbilly",
+      "image": "the-hillbilly",
+      "type": "killer"
+    },
+    {
+      "name": "The Houndmaster",
+      "image": "the-houndmaster",
+      "type": "killer"
+    },
+    {
+      "name": "The Huntress",
+      "image": "the-huntress",
+      "type": "killer"
+    },
+    {
+      "name": "The Knight",
+      "image": "the-knight",
+      "type": "killer"
+    },
+    {
+      "name": "The Krasue",
+      "image": "the-krasue",
+      "type": "killer"
+    },
+    {
+      "name": "The Legion",
+      "image": "the-legion",
+      "type": "killer"
+    },
+    {
+      "name": "The Lich",
+      "image": "the-lich",
+      "type": "killer"
+    },
+    {
+      "name": "The Mastermind",
+      "image": "the-mastermind",
+      "type": "killer"
+    },
+    {
+      "name": "The Nemesis",
+      "image": "the-nemesis",
+      "type": "killer"
+    },
+    {
+      "name": "The Nightmare",
+      "image": "the-nightmare",
+      "type": "killer"
+    },
+    {
+      "name": "The Nurse",
+      "image": "the-nurse",
+      "type": "killer"
+    },
+    {
+      "name": "The Oni",
+      "image": "the-oni",
+      "type": "killer"
+    },
+    {
+      "name": "The Onryo",
+      "image": "the-onryo",
+      "type": "killer"
+    },
+    {
+      "name": "The Pig",
+      "image": "the-pig",
+      "type": "killer"
+    },
+    {
+      "name": "The Plague",
+      "image": "the-plague",
+      "type": "killer"
+    },
+    {
+      "name": "The Shape",
+      "image": "the-shape",
+      "type": "killer"
+    },
+    {
+      "name": "The Singularity",
+      "image": "the-singularity",
+      "type": "killer"
+    },
+    {
+      "name": "The Skull Merchant",
+      "image": "the-skull-merchant",
+      "type": "killer"
+    },
+    {
+      "name": "The Spirit",
+      "image": "the-spirit",
+      "type": "killer"
+    },
+    {
+      "name": "The Trapper",
+      "image": "the-trapper",
+      "type": "killer"
+    },
+    {
+      "name": "The Trickster",
+      "image": "the-trickster",
+      "type": "killer"
+    },
+    {
+      "name": "The Twins",
+      "image": "the-twins",
+      "type": "killer"
+    },
+    {
+      "name": "The Unknown",
+      "image": "the-unknown",
+      "type": "killer"
+    },
+    {
+      "name": "The Wraith",
+      "image": "the-wraith",
+      "type": "killer"
+    },
+    {
+      "name": "The Xenomorph",
+      "image": "the-xenomorph",
+      "type": "killer"
+    }
+  ]
+}

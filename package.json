@@ -1,0 +1,57 @@
+{
+  "name": "dbd-streak-overlay",
+  "version": "0.2.0",
+  "author": "Superdazed",
+  "repository": "superdazed/dbd-streak-overlay",
+  "description": "A tool for Dead by Daylight streamers to create and manage winstreak overlays",
+  "main": "electron/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "start": "electron .",
+    "build": "vite build",
+    "test": "node scripts/test.js",
+    "publish:win": "dotenv -e .env -- npx electron-builder -w -p always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.1.1",
+    "express": "^4.19.2",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "chokidar": "^4.0.3",
+    "dotenv-cli": "^10.0.0",
+    "electron": "^30.0.1",
+    "electron-builder": "^26.0.12",
+    "vite": "^5.4.6"
+  },
+  "build": {
+    "productName": "Streak Overlay for Dead by Daylight",
+    "icon": "build/icon.ico",
+    "appId": "com.superdazed.dbd-streak-overlay",
+    "publish": [
+      {
+        "provider": "github"
+      }
+    ],
+    "win": {
+      "signAndEditExecutable": true,
+      "icon": "build/icon.ico",
+      "artifactName": "DBDStreakOverlay (${version}) Installer.${ext}",
+      "executableName": "DBDStreakOverlay"
+    },
+    "nsis": {
+      "shortcutName": "Streak Overlay for Dead by Daylight",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
+    },
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "icons/icon.ico"
+      }
+    ],
+    "copyright": "Copyright (c) Superdazed"
+  }
+}
