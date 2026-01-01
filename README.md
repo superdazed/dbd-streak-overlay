@@ -1,4 +1,5 @@
 # Streak Overlay for Dead by Daylight
+[![Join the Discord server](https://img.shields.io/discord/1456421254302142555?logo=discord&logoColor=eee&label=Discord&labelColor=464ce5&color=fff&cacheSeconds=43200)](https://discord.gg/puZuDXrcAU)
 
 A tool for Dead by Daylight streamers to create and manage winstreak and scoreboard overlays.
 
@@ -59,6 +60,10 @@ To resize the entire overlay, resize the source in your streaming software. Avoi
 ## Update
 
 **Streak Overlay for Dead by Daylight** automatically installs updates when they become available on GitHub.
+
+## Support
+
+For help or feedback, join the [Discord server](https://discord.gg/puZuDXrcAU). You may also [open a new issue](https://github.com/superdazed/dbd-streak-overlay/issues/new).
 
 ## Third Party Legal Notices
 
