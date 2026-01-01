@@ -2,47 +2,63 @@
 
 A tool for Dead by Daylight streamers to create and manage winstreak and scoreboard overlays.
 
-<img width="500" alt="Example 1 of a streak" src="https://github.com/user-attachments/assets/72100db3-c4cf-4462-bee5-5fd1edbeead1" />
-<img width="500" alt="Example 2 of a streak" src="https://github.com/user-attachments/assets/b3440992-aa47-4b1f-a556-493cb9af5e78" />
+<img width="400" alt="Example 1 of a streak" src="https://github.com/user-attachments/assets/72100db3-c4cf-4462-bee5-5fd1edbeead1" />
+<img width="400" alt="Example 2 of a streak" src="https://github.com/user-attachments/assets/b3440992-aa47-4b1f-a556-493cb9af5e78" />
 
-<img width="500" alt="Example 1 of a scoreboard" src="https://github.com/user-attachments/assets/0cc77b4e-68ef-4b2c-b8bf-b1232d74a0d6" />
-<img width="500" alt="Example 2 of a scoreboard" src="https://github.com/user-attachments/assets/f141bf91-ce77-401d-9ef1-ad2eadca1f16" />
+<img width="400" alt="Example 1 of a scoreboard" src="https://github.com/user-attachments/assets/0cc77b4e-68ef-4b2c-b8bf-b1232d74a0d6" />
+<img width="400" alt="Example 2 of a scoreboard" src="https://github.com/user-attachments/assets/f141bf91-ce77-401d-9ef1-ad2eadca1f16" />
 
 ## Install
 
-> Note: This app is in alpha and may break unexpectedly. Save any information that you enter into the app in another place.
+> **Note**
+> This app is in alpha and may be unstable. Save any information you enter in another location.
+
+**Streak Overlay for Dead by Daylight** is available for Windows 11.
 
 1. Download the [latest release](https://github.com/superdazed/dbd-streak-overlay/releases/latest).
-2. Your browser may warn you that the app is not commonly downloaded. Select the three dots menu and click "Keep".
-3. Microsoft Defender SmartScreen may warn you that the app is not commonly downloaded. Select the dropdown menu next to "Delete", and click "Keep anyway".
-4. Open the installer and follow the prompts.
-5. When the app has finished installing, you will be provided with instructions on how to setup OBS. Follow these steps to add the overlay to OBS.
+2. If your browser warns that the app isn’t commonly downloaded, select More options (three dots), then select Keep.
+3. If Microsoft Defender SmartScreen appears, select the arrow next to Delete, then select Keep anyway.
+4. Open the installer and follow the on-screen instructions.
+5. After installation is complete, follow the provided instructions to set up your streaming software.
 
-## Setting up streaks
+## Features
 
-You can setup streaks via the dock, in the "Streaks" section.
+**Streak Overlay for Dead by Daylight** provides a browser source URL and a custom dock URL.
 
-1. Select the character or type from the dropdown.
-   If you select a Killer, the Killer's name will be used for the streak name. If you select a Survivor, "Survivor" will be used for the streak name, unless you pick a custom name. If you select "Other", you can enter a custom name.
-2. Toggle "Show on stream" to make the streak visible in the source.
-3. For Killer and Survivor characters, toggle "Show image" to show their character portrait in the source.
-4. Optionally, in "Record/Target Label", enter a label for the target/record badge (e.g. "WR" or "PB").
-5. Optionally, in "Record/Target Value", enter a value for the target/record badge.
-6. Click the "+" button to increase the streak value by one. If the streak value is the same as the target value, the target value will also increase by one.
+- Use the browser source URL to add the overlay to your broadcast scenes.
+- Use the dock to configure the overlay and update it in real time.
 
-You can rearrange streaks by clicking and dragging on a streak.
+### Set up streaks
 
-## Setting up a scoreboard
+Set up streaks in the dock under the **Streaks** section.
 
-You can setup a scoreboard via the dock, in the "Scoreboard" section. You can change the color of the scoreboard and upload a custom logo to replace the Dead by Daylight default (e.g. a team logo). Logos/icons with a transparent background work best.
+1. Select a character or type from the dropdown list.
 
-## Customizing the design
+    - If you select a **Killer**, the Killer’s name is used as the streak name.
+    - If you select a **Survivor**, the streak name defaults to _Survivor_ unless you enter a custom name.
+    - If you select **Other**, enter a custom name.
 
-In the dock, click "Settings". You change the font style, font size, and font color (streaks only). To decrease the size of the whole overlay, transform the source in OBS. Avoid increasing the size of the overlay in OBS as this may cause the overlay to become distorted. Use the font size setting to increase the size of streaks.
+2. Turn on **Show on stream** to display the streak in the overlay.
+3. For Killer and Survivor characters, turn on **Show image** to display the character portrait.
+4. (Optional) In **Record/Target label**, enter a label for the badge, such as WR or PB.
+5. (Optional) In **Record/Target value**, enter a target or record value.
+6. Select + to increase the streak value by one. If the streak value matches the target value, the target value also increases by one.
+
+To reorder streaks, drag a streak to a new position.
+
+### Set up a scoreboard
+
+Set up a scoreboard in the dock under the Scoreboard section. You can change the scoreboard color and upload a custom logo to replace the default Dead by Daylight logo (for example, a team logo). Logos with a transparent background work best.
+
+### Customize the design
+
+In the dock, select Settings to change the font style, font size, and font color (streaks only).
+
+To resize the entire overlay, resize the source in your streaming software. Avoid increasing the size there, as it may cause distortion. To make streaks larger, use the font size setting instead.
 
 ## Update
 
-Streak Overlay for Dead by Daylight will automatically install updates when they become available via GitHub.
+**Streak Overlay for Dead by Daylight** automatically installs updates when they become available on GitHub.
 
 ## Third Party Legal Notices
 
