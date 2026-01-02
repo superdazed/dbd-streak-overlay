@@ -43,6 +43,11 @@
           <h5 class="mb-0">Scoreboard</h5>
           <div class="d-flex align-items-center gap-2">
             <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#scoreboardSettingsModal">Settings</button>
+            <button class="btn btn-outline-danger btn-sm" id="scoreboard-reset">Reset</button>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="scoreboard-1v1-mode">
+              <label class="form-check-label" for="scoreboard-1v1-mode">1v1 Mode</label>
+            </div>
             <div class="form-check form-switch">
               <input class="form-check-input" type="checkbox" id="scoreboard-show" checked>
               <label class="form-check-label" for="scoreboard-show">Show on stream</label>
@@ -60,31 +65,36 @@
             <div class="col-md-6">
               <div class="form-floating">
                 <input type="text" class="form-control" id="scoreboard-team1-name" placeholder="Team 1 Name">
-                <label for="scoreboard-team1-name">Team 1 Name</label>
+                <label for="scoreboard-team1-name">Team/Player 1 Name</label>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-floating">
                 <input type="number" class="form-control" id="scoreboard-team1-score" placeholder="Team 1 Score" min="0">
-                <label for="scoreboard-team1-score">Team 1 Score</label>
+                <label for="scoreboard-team1-score">Team/Player 1 Score</label>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-floating">
                 <input type="text" class="form-control" id="scoreboard-team2-name" placeholder="Team 2 Name">
-                <label for="scoreboard-team2-name">Team 2 Name</label>
+                <label for="scoreboard-team2-name">Team/Player 2 Name</label>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-floating">
                 <input type="number" class="form-control" id="scoreboard-team2-score" placeholder="Team 2 Score" min="0">
-                <label for="scoreboard-team2-score">Team 2 Score</label>
+                <label for="scoreboard-team2-score">Team/Player 2 Score</label>
               </div>
             </div>
             <div class="col-12">
               <div class="form-floating">
                 <input type="text" class="form-control" id="scoreboard-win-condition" placeholder="Win Condition">
                 <label for="scoreboard-win-condition">Win Condition</label>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="alert alert-info mb-0" id="1v1-mode-info" style="display: none;">
+                <small><strong>1v1 Timer Mode:</strong> Press <kbd>`</kbd> to start/stop the timers. First press starts Player 1, second stops Player 1, third starts Player 2, fourth stops Player 2 and awards point to faster player, fifth resets the timers to 0:00.00.</small>
               </div>
             </div>
           </div>
@@ -128,6 +138,21 @@
                 <label class="form-label">Font Color</label>
                 <input id="font-color" class="form-control form-control-color form-control-sm" type="color" />
               </div>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Overlay Position</label>
+              <select id="overlay-corner" class="form-select form-select-sm">
+                <option value="top-left">Top Left</option>
+                <option value="top-right">Top Right</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="bottom-right">Bottom Right</option>
+              </select>
+              <small class="text-body-secondary">Choose which corner the overlay is pinned to</small>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Edge Padding (px)</label>
+              <input id="overlay-padding" class="form-control form-control-sm" type="number" min="0" value="0" />
+              <small class="text-body-secondary">Distance from the screen edges in pixels</small>
             </div>
           </div>
           <div class="modal-footer">

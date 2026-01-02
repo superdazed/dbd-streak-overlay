@@ -25,6 +25,8 @@ const resetBtn = document.getElementById('reset-all');
 const fontFaceSel = document.getElementById('font-face');
 const fontSizeInput = document.getElementById('font-size');
 const fontColorInput = document.getElementById('font-color');
+const overlayCornerSel = document.getElementById('overlay-corner');
+const overlayPaddingInput = document.getElementById('overlay-padding');
 const updateToastEl = document.getElementById('update-toast');
 let updateToast;
 
@@ -49,7 +51,7 @@ if (document.readyState === 'loading') {
 
 function defaultOverlay() {
   return {
-    settings: { fontFace: 'Roboto', fontSize: 28, fontColor: '#ffffff' },
+    settings: { fontFace: 'Roboto', fontSize: 28, fontColor: '#ffffff', overlayCorner: 'top-left', overlayPadding: 0 },
     streaks: [],
     scoreboard: {
       title: '',
@@ -59,6 +61,13 @@ function defaultOverlay() {
       team2Score: 0,
       winCondition: '',
       show: true,
+      oneVOneMode: false,
+      timerState: 'idle',
+      team1Timer: 0,
+      team2Timer: 0,
+      team1StartTime: null,
+      team2StartTime: null,
+      winningTimer: null,
       design: {
         primaryColor: '#000000',
         secondaryColor: '#4a5568',
@@ -70,7 +79,7 @@ function defaultOverlay() {
 }
 
 function loadFromLocal() {
-  isLoading = true; // Prevent saves during loading
+  isLoading = true;
   const raw = localStorage.getItem('overlayData');
   let parsed = null;
   try {
@@ -83,7 +92,9 @@ function loadFromLocal() {
     settings: {
       fontFace: (parsed && parsed.settings && parsed.settings.fontFace) || defaults.settings.fontFace,
       fontSize: (parsed && parsed.settings && parsed.settings.fontSize) || defaults.settings.fontSize,
-      fontColor: (parsed && parsed.settings && parsed.settings.fontColor) || defaults.settings.fontColor
+      fontColor: (parsed && parsed.settings && parsed.settings.fontColor) || defaults.settings.fontColor,
+      overlayCorner: (parsed && parsed.settings && parsed.settings.overlayCorner) || defaults.settings.overlayCorner,
+      overlayPadding: (parsed && parsed.settings && parsed.settings.overlayPadding !== undefined) ? parsed.settings.overlayPadding : defaults.settings.overlayPadding
     },
     streaks: Array.isArray(parsed && parsed.streaks) ? parsed.streaks : defaults.streaks,
     scoreboard: parsed && parsed.scoreboard ? {
@@ -94,6 +105,13 @@ function loadFromLocal() {
       team2Score: parsed.scoreboard.team2Score !== undefined ? parsed.scoreboard.team2Score : defaults.scoreboard.team2Score,
       winCondition: parsed.scoreboard.winCondition !== undefined ? parsed.scoreboard.winCondition : defaults.scoreboard.winCondition,
       show: parsed.scoreboard.show !== undefined ? parsed.scoreboard.show : defaults.scoreboard.show,
+      oneVOneMode: parsed.scoreboard.oneVOneMode !== undefined ? parsed.scoreboard.oneVOneMode : defaults.scoreboard.oneVOneMode,
+      timerState: parsed.scoreboard.timerState !== undefined ? parsed.scoreboard.timerState : defaults.scoreboard.timerState,
+      team1Timer: parsed.scoreboard.team1Timer !== undefined ? parsed.scoreboard.team1Timer : defaults.scoreboard.team1Timer,
+      team2Timer: parsed.scoreboard.team2Timer !== undefined ? parsed.scoreboard.team2Timer : defaults.scoreboard.team2Timer,
+      team1StartTime: parsed.scoreboard.team1StartTime !== undefined ? parsed.scoreboard.team1StartTime : defaults.scoreboard.team1StartTime,
+      team2StartTime: parsed.scoreboard.team2StartTime !== undefined ? parsed.scoreboard.team2StartTime : defaults.scoreboard.team2StartTime,
+      winningTimer: parsed.scoreboard.winningTimer !== undefined ? parsed.scoreboard.winningTimer : defaults.scoreboard.winningTimer,
       design: parsed.scoreboard.design ? {
         primaryColor: parsed.scoreboard.design.primaryColor !== undefined ? parsed.scoreboard.design.primaryColor : defaults.scoreboard.design.primaryColor,
         secondaryColor: parsed.scoreboard.design.secondaryColor !== undefined ? parsed.scoreboard.design.secondaryColor : defaults.scoreboard.design.secondaryColor,
@@ -104,14 +122,14 @@ function loadFromLocal() {
   fontFaceSel.value = overlayData.settings.fontFace;
   fontSizeInput.value = overlayData.settings.fontSize;
   fontColorInput.value = overlayData.settings.fontColor;
+  if (overlayCornerSel) overlayCornerSel.value = overlayData.settings.overlayCorner || 'top-left';
+  if (overlayPaddingInput) overlayPaddingInput.value = overlayData.settings.overlayPadding !== undefined ? overlayData.settings.overlayPadding : 0;
   (overlayData.streaks || []).forEach(s => addStreak(s));
   
-  // Initialize font preview after a short delay to ensure DOM is ready
   setTimeout(() => {
     updateFontPreview();
   }, 100);
   
-  // Load scoreboard data
   const scoreboardTitleInput = document.getElementById('scoreboard-title');
   const team1NameInput = document.getElementById('scoreboard-team1-name');
   const team1ScoreInput = document.getElementById('scoreboard-team1-score');
@@ -119,12 +137,14 @@ function loadFromLocal() {
   const team2ScoreInput = document.getElementById('scoreboard-team2-score');
   const winConditionInput = document.getElementById('scoreboard-win-condition');
   const scoreboardShowInput = document.getElementById('scoreboard-show');
+  const scoreboard1v1ModeInput = document.getElementById('scoreboard-1v1-mode');
   const scoreboardPrimaryColorInput = document.getElementById('scoreboard-primary-color');
   const scoreboardSecondaryColorInput = document.getElementById('scoreboard-secondary-color');
   const scoreboardBorderRadiusInput = document.getElementById('scoreboard-border-radius');
   const scoreboardIconUploadInput = document.getElementById('scoreboard-icon-upload');
   const scoreboardIconPreview = document.getElementById('scoreboard-icon-preview');
   const scoreboardIconPreviewImg = document.getElementById('scoreboard-icon-preview-img');
+  const oneVOneModeInfo = document.getElementById('1v1-mode-info');
   
   if (scoreboardTitleInput) scoreboardTitleInput.value = overlayData.scoreboard.title || '';
   if (team1NameInput) team1NameInput.value = overlayData.scoreboard.team1Name || '';
@@ -133,17 +153,20 @@ function loadFromLocal() {
   if (team2ScoreInput) team2ScoreInput.value = overlayData.scoreboard.team2Score || 0;
   if (winConditionInput) winConditionInput.value = overlayData.scoreboard.winCondition || '';
   if (scoreboardShowInput) scoreboardShowInput.checked = overlayData.scoreboard.show !== false;
+  if (scoreboard1v1ModeInput) {
+    scoreboard1v1ModeInput.checked = overlayData.scoreboard.oneVOneMode === true;
+    if (oneVOneModeInfo) {
+      oneVOneModeInfo.style.display = overlayData.scoreboard.oneVOneMode === true ? 'block' : 'none';
+    }
+  }
   
-  // Load design settings
   const design = overlayData.scoreboard.design || defaultOverlay().scoreboard.design;
   if (scoreboardPrimaryColorInput) scoreboardPrimaryColorInput.value = design.primaryColor || '#000000';
   if (scoreboardSecondaryColorInput) scoreboardSecondaryColorInput.value = design.secondaryColor || '#4a5568';
   if (scoreboardBorderRadiusInput) scoreboardBorderRadiusInput.value = design.borderRadius !== undefined ? design.borderRadius : 4;
   
-  // Load icon image
   if (design.iconImage && scoreboardIconPreviewImg) {
     const iconSrc = design.iconImage;
-    // Only load if it's a valid image URL (not empty, not current page URL)
     if (iconSrc && 
         iconSrc !== '' && 
         iconSrc !== window.location.href &&
@@ -155,12 +178,11 @@ function loadFromLocal() {
     }
   }
   
-  isLoading = false; // Re-enable saves after loading is complete
+  isLoading = false;
 }
 
 
 function saveToLocal() {
-  // Don't save during loading to prevent overwriting with empty values
   if (isLoading) return;
   
   const scoreboardTitleInput = document.getElementById('scoreboard-title');
@@ -170,17 +192,15 @@ function saveToLocal() {
   const team2ScoreInput = document.getElementById('scoreboard-team2-score');
   const winConditionInput = document.getElementById('scoreboard-win-condition');
   const scoreboardShowInput = document.getElementById('scoreboard-show');
+  const scoreboard1v1ModeInput = document.getElementById('scoreboard-1v1-mode');
   const scoreboardPrimaryColorInput = document.getElementById('scoreboard-primary-color');
   const scoreboardSecondaryColorInput = document.getElementById('scoreboard-secondary-color');
   const scoreboardBorderRadiusInput = document.getElementById('scoreboard-border-radius');
   const scoreboardIconPreviewImg = document.getElementById('scoreboard-icon-preview-img');
   
-  // Get design settings
   let iconImage = null;
   if (scoreboardIconPreviewImg && scoreboardIconPreviewImg.src) {
     const src = scoreboardIconPreviewImg.src;
-    // Only save if it's a data URL (uploaded image) or a valid absolute path
-    // Exclude empty strings and current page URLs
     if (src && 
         src !== '' && 
         src !== window.location.href &&
@@ -198,11 +218,20 @@ function saveToLocal() {
     iconImage: iconImage
   };
   
+  const currentTimerState = overlayData.scoreboard ? overlayData.scoreboard.timerState : 'idle';
+  const currentTeam1Timer = overlayData.scoreboard ? overlayData.scoreboard.team1Timer : 0;
+  const currentTeam2Timer = overlayData.scoreboard ? overlayData.scoreboard.team2Timer : 0;
+  const currentTeam1StartTime = overlayData.scoreboard ? overlayData.scoreboard.team1StartTime : null;
+  const currentTeam2StartTime = overlayData.scoreboard ? overlayData.scoreboard.team2StartTime : null;
+  const currentWinningTimer = overlayData.scoreboard ? overlayData.scoreboard.winningTimer : null;
+  
   overlayData = {
     settings: {
       fontFace: fontFaceSel.value,
       fontSize: Number(fontSizeInput.value) || 28,
-      fontColor: fontColorInput.value || '#ffffff'
+      fontColor: fontColorInput.value || '#ffffff',
+      overlayCorner: overlayCornerSel ? overlayCornerSel.value : 'top-left',
+      overlayPadding: overlayPaddingInput ? Number(overlayPaddingInput.value) || 0 : 0
     },
     streaks: Array.from(streakList.children).map(row => {
       const selected = row.querySelector('.character-type').value;
@@ -232,6 +261,13 @@ function saveToLocal() {
       team2Score: team2ScoreInput ? Number(team2ScoreInput.value) || 0 : 0,
       winCondition: winConditionInput ? winConditionInput.value : '',
       show: scoreboardShowInput ? scoreboardShowInput.checked : true,
+      oneVOneMode: scoreboard1v1ModeInput ? scoreboard1v1ModeInput.checked : false,
+      timerState: currentTimerState,
+      team1Timer: currentTeam1Timer,
+      team2Timer: currentTeam2Timer,
+      team1StartTime: currentTeam1StartTime,
+      team2StartTime: currentTeam2StartTime,
+      winningTimer: currentWinningTimer,
       design: designSettings
     }
   };
@@ -502,6 +538,8 @@ resetBtn.addEventListener('click', () => {
   fontFaceSel.value = defaults.settings.fontFace;
   fontSizeInput.value = defaults.settings.fontSize;
   fontColorInput.value = defaults.settings.fontColor;
+  if (overlayCornerSel) overlayCornerSel.value = defaults.settings.overlayCorner;
+  if (overlayPaddingInput) overlayPaddingInput.value = defaults.settings.overlayPadding;
   const scoreboardTitleInput = document.getElementById('scoreboard-title');
   const team1NameInput = document.getElementById('scoreboard-team1-name');
   const team1ScoreInput = document.getElementById('scoreboard-team1-score');
@@ -509,6 +547,9 @@ resetBtn.addEventListener('click', () => {
   const team2ScoreInput = document.getElementById('scoreboard-team2-score');
   const winConditionInput = document.getElementById('scoreboard-win-condition');
   const scoreboardShowInput = document.getElementById('scoreboard-show');
+  const scoreboard1v1ModeInput = document.getElementById('scoreboard-1v1-mode');
+  const oneVOneModeInfo = document.getElementById('1v1-mode-info');
+  
   if (scoreboardTitleInput) scoreboardTitleInput.value = defaults.scoreboard.title;
   if (team1NameInput) team1NameInput.value = defaults.scoreboard.team1Name;
   if (team1ScoreInput) team1ScoreInput.value = defaults.scoreboard.team1Score;
@@ -516,6 +557,12 @@ resetBtn.addEventListener('click', () => {
   if (team2ScoreInput) team2ScoreInput.value = defaults.scoreboard.team2Score;
   if (winConditionInput) winConditionInput.value = defaults.scoreboard.winCondition;
   if (scoreboardShowInput) scoreboardShowInput.checked = defaults.scoreboard.show;
+  if (scoreboard1v1ModeInput) {
+    scoreboard1v1ModeInput.checked = defaults.scoreboard.oneVOneMode;
+    if (oneVOneModeInfo) {
+      oneVOneModeInfo.style.display = defaults.scoreboard.oneVOneMode ? 'block' : 'none';
+    }
+  }
   const scoreboardPrimaryColorInput = document.getElementById('scoreboard-primary-color');
   const scoreboardSecondaryColorInput = document.getElementById('scoreboard-secondary-color');
   const scoreboardBorderRadiusInput = document.getElementById('scoreboard-border-radius');
@@ -590,6 +637,18 @@ fontColorInput.addEventListener('input', () => {
   updateFontPreview();
   saveToLocal();
 });
+if (overlayCornerSel) {
+  overlayCornerSel.addEventListener('change', () => {
+    saveToLocal();
+    ws.send(JSON.stringify({ type: 'update', data: overlayData }));
+  });
+}
+if (overlayPaddingInput) {
+  overlayPaddingInput.addEventListener('input', () => {
+    saveToLocal();
+    ws.send(JSON.stringify({ type: 'update', data: overlayData }));
+  });
+}
 
 // Update preview when modal opens
 const settingsModal = document.getElementById('settingsModal');
@@ -613,6 +672,193 @@ if (team2NameInput) team2NameInput.addEventListener('input', saveToLocal);
 if (team2ScoreInput) team2ScoreInput.addEventListener('input', saveToLocal);
 if (winConditionInput) winConditionInput.addEventListener('input', saveToLocal);
 if (scoreboardShowInput) scoreboardShowInput.addEventListener('change', saveToLocal);
+
+// Scoreboard reset button
+const scoreboardResetBtn = document.getElementById('scoreboard-reset');
+if (scoreboardResetBtn) {
+  scoreboardResetBtn.addEventListener('click', () => {
+    const confirmed = window.confirm('Reset scoreboard? This will clear all scores, timers, and timer state. This cannot be undone.');
+    if (!confirmed) return;
+    
+    const team1ScoreInput = document.getElementById('scoreboard-team1-score');
+    const team2ScoreInput = document.getElementById('scoreboard-team2-score');
+    
+    if (team1ScoreInput) team1ScoreInput.value = 0;
+    if (team2ScoreInput) team2ScoreInput.value = 0;
+    
+    if (overlayData.scoreboard) {
+      overlayData.scoreboard.team1Score = 0;
+      overlayData.scoreboard.team2Score = 0;
+      overlayData.scoreboard.team1Timer = 0;
+      overlayData.scoreboard.team2Timer = 0;
+      overlayData.scoreboard.timerState = 'idle';
+      overlayData.scoreboard.team1StartTime = null;
+      overlayData.scoreboard.team2StartTime = null;
+      overlayData.scoreboard.winningTimer = null;
+    }
+    
+    if (timerUpdateInterval) {
+      clearInterval(timerUpdateInterval);
+      timerUpdateInterval = null;
+    }
+    
+    saveToLocal();
+    ws.send(JSON.stringify({ type: 'update', data: overlayData }));
+    
+    try {
+      updateToast = updateToast || new bootstrap.Toast(updateToastEl);
+      updateToast.show();
+    } catch {}
+  });
+}
+
+const scoreboard1v1ModeInput = document.getElementById('scoreboard-1v1-mode');
+const oneVOneModeInfo = document.getElementById('1v1-mode-info');
+if (scoreboard1v1ModeInput) {
+  scoreboard1v1ModeInput.addEventListener('change', () => {
+    if (!scoreboard1v1ModeInput.checked) {
+      if (overlayData.scoreboard) {
+        overlayData.scoreboard.timerState = 'idle';
+        overlayData.scoreboard.team1Timer = 0;
+        overlayData.scoreboard.team2Timer = 0;
+        overlayData.scoreboard.team1StartTime = null;
+        overlayData.scoreboard.team2StartTime = null;
+      }
+    }
+    if (oneVOneModeInfo) {
+      oneVOneModeInfo.style.display = scoreboard1v1ModeInput.checked ? 'block' : 'none';
+    }
+    saveToLocal();
+    ws.send(JSON.stringify({ type: 'update', data: overlayData }));
+  });
+}
+
+let timerUpdateInterval = null;
+
+function startTimerUpdate() {
+  if (timerUpdateInterval) clearInterval(timerUpdateInterval);
+  
+  timerUpdateInterval = setInterval(() => {
+    if (!overlayData.scoreboard || !overlayData.scoreboard.oneVOneMode) {
+      if (timerUpdateInterval) {
+        clearInterval(timerUpdateInterval);
+        timerUpdateInterval = null;
+      }
+      return;
+    }
+    
+    const timerState = overlayData.scoreboard.timerState;
+    const now = Date.now();
+    
+    if (timerState === 'team1-running' && overlayData.scoreboard.team1StartTime) {
+      overlayData.scoreboard.team1Timer = now - overlayData.scoreboard.team1StartTime;
+    } else if (timerState === 'team2-running' && overlayData.scoreboard.team2StartTime) {
+      overlayData.scoreboard.team2Timer = now - overlayData.scoreboard.team2StartTime;
+    } else {
+      if (timerUpdateInterval) {
+        clearInterval(timerUpdateInterval);
+        timerUpdateInterval = null;
+      }
+      return;
+    }
+    
+    ws.send(JSON.stringify({ type: 'update', data: overlayData }));
+  }, 100);
+}
+
+function handleTimerToggle() {
+  if (!overlayData.scoreboard || !overlayData.scoreboard.oneVOneMode) {
+    return;
+  }
+  
+  const timerState = overlayData.scoreboard.timerState || 'idle';
+  const now = Date.now();
+  const team1ScoreInput = document.getElementById('scoreboard-team1-score');
+  const team2ScoreInput = document.getElementById('scoreboard-team2-score');
+  
+  if (timerState === 'idle') {
+    const team1Timer = overlayData.scoreboard.team1Timer || 0;
+    const team2Timer = overlayData.scoreboard.team2Timer || 0;
+    
+    if (team1Timer > 0 || team2Timer > 0) {
+      overlayData.scoreboard.team1Timer = 0;
+      overlayData.scoreboard.team2Timer = 0;
+      overlayData.scoreboard.team1StartTime = null;
+      overlayData.scoreboard.team2StartTime = null;
+      overlayData.scoreboard.winningTimer = null;
+    } else {
+      overlayData.scoreboard.timerState = 'team1-running';
+      overlayData.scoreboard.team1StartTime = now;
+      overlayData.scoreboard.team1Timer = 0;
+      overlayData.scoreboard.team2Timer = 0;
+      overlayData.scoreboard.team2StartTime = null;
+      overlayData.scoreboard.winningTimer = null;
+    }
+    
+  } else if (timerState === 'team1-running') {
+    overlayData.scoreboard.team1Timer = now - overlayData.scoreboard.team1StartTime;
+    overlayData.scoreboard.timerState = 'team1-stopped';
+    overlayData.scoreboard.team1StartTime = null;
+    if (timerUpdateInterval) {
+      clearInterval(timerUpdateInterval);
+      timerUpdateInterval = null;
+    }
+    
+  } else if (timerState === 'team1-stopped') {
+    overlayData.scoreboard.timerState = 'team2-running';
+    overlayData.scoreboard.team2StartTime = now;
+    overlayData.scoreboard.team2Timer = 0;
+    overlayData.scoreboard.team1StartTime = null;
+    
+  } else if (timerState === 'team2-running') {
+    overlayData.scoreboard.team2Timer = now - overlayData.scoreboard.team2StartTime;
+    overlayData.scoreboard.team2StartTime = null;
+    
+    const team1Time = overlayData.scoreboard.team1Timer;
+    const team2Time = overlayData.scoreboard.team2Timer;
+    
+    if (team1Time < team2Time) {
+      overlayData.scoreboard.team1Score = (overlayData.scoreboard.team1Score || 0) + 1;
+      if (team1ScoreInput) team1ScoreInput.value = overlayData.scoreboard.team1Score;
+      overlayData.scoreboard.winningTimer = 'team1';
+    } else if (team2Time < team1Time) {
+      overlayData.scoreboard.team2Score = (overlayData.scoreboard.team2Score || 0) + 1;
+      if (team2ScoreInput) team2ScoreInput.value = overlayData.scoreboard.team2Score;
+      overlayData.scoreboard.winningTimer = 'team2';
+    } else {
+      overlayData.scoreboard.winningTimer = null;
+    }
+    
+    overlayData.scoreboard.timerState = 'idle';
+    if (timerUpdateInterval) {
+      clearInterval(timerUpdateInterval);
+      timerUpdateInterval = null;
+    }
+  }
+  
+  saveToLocal();
+  ws.send(JSON.stringify({ type: 'update', data: overlayData }));
+  
+  if (overlayData.scoreboard.timerState === 'team1-running' || overlayData.scoreboard.timerState === 'team2-running') {
+    startTimerUpdate();
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (overlayData.scoreboard && overlayData.scoreboard.oneVOneMode) {
+    if (e.key === '`' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      handleTimerToggle();
+    }
+  }
+});
+
+if (overlayData.scoreboard && overlayData.scoreboard.oneVOneMode) {
+  const timerState = overlayData.scoreboard.timerState;
+  if (timerState === 'team1-running' || timerState === 'team2-running') {
+    startTimerUpdate();
+  }
+}
 
 // Scoreboard design settings listeners
 const scoreboardPrimaryColorInput = document.getElementById('scoreboard-primary-color');
@@ -712,5 +958,8 @@ ws.addEventListener('message', ev => {
   const msg = JSON.parse(ev.data);
   if (msg.type === 'reload') {
     location.reload();
+  }
+  if (msg.type === 'timer-toggle') {
+    handleTimerToggle();
   }
 });

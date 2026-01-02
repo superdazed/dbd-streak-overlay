@@ -85,6 +85,15 @@ function hexToRgba(hex, alpha = 0.9) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+function formatTime(milliseconds) {
+  if (milliseconds === null || milliseconds === undefined) return '00:00.00';
+  const totalMs = Math.floor(milliseconds);
+  const minutes = Math.floor(totalMs / 60000);
+  const seconds = Math.floor((totalMs % 60000) / 1000);
+  const centiseconds = Math.floor((totalMs % 1000) / 10);
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centiseconds).padStart(2, '0')}`;
+}
+
 function loadFont(font) {
   const id = 'google-font';
   let link = document.getElementById(id);
@@ -100,6 +109,9 @@ function loadFont(font) {
   document.head.appendChild(link);
 }
 
+let currentOverlayData = null;
+let timerUpdateInterval = null;
+
 ws.addEventListener('message', ev => {
   const data = JSON.parse(ev.data);
   if (data.type === 'reload') {
@@ -107,9 +119,73 @@ ws.addEventListener('message', ev => {
     return;
   }
   if (data.type === 'update') {
+    currentOverlayData = data.data;
     render(data.data);
+    updateTimerInterval();
   }
 });
+
+function updateTimerInterval() {
+  if (timerUpdateInterval) {
+    clearInterval(timerUpdateInterval);
+    timerUpdateInterval = null;
+  }
+  
+  if (!currentOverlayData || !currentOverlayData.scoreboard || !currentOverlayData.scoreboard.oneVOneMode) {
+    return;
+  }
+  
+  const timerState = currentOverlayData.scoreboard.timerState;
+  if (timerState === 'team1-running' || timerState === 'team2-running') {
+    timerUpdateInterval = setInterval(() => {
+      const team1TimerEl = document.querySelector('.scoreboard-team-timer[data-timer="team1"]');
+      const team2TimerEl = document.querySelector('.scoreboard-team-timer[data-timer="team2"]');
+      
+      if (!currentOverlayData || !currentOverlayData.scoreboard) {
+        if (timerUpdateInterval) {
+          clearInterval(timerUpdateInterval);
+          timerUpdateInterval = null;
+        }
+        return;
+      }
+      
+      const scoreboard = currentOverlayData.scoreboard;
+      const state = scoreboard.timerState;
+      
+      if (team1TimerEl && team1TimerEl.getAttribute('data-timer') === 'team1') {
+        if (state === 'team1-running' && scoreboard.team1StartTime) {
+          const elapsed = Date.now() - scoreboard.team1StartTime;
+          team1TimerEl.textContent = formatTime(elapsed);
+          team1TimerEl.classList.add('timer-running');
+        } else {
+          team1TimerEl.textContent = formatTime(scoreboard.team1Timer || 0);
+          team1TimerEl.classList.remove('timer-running');
+        }
+        if (scoreboard.winningTimer === 'team1') {
+          team1TimerEl.classList.add('timer-winner');
+        } else {
+          team1TimerEl.classList.remove('timer-winner');
+        }
+      }
+      
+      if (team2TimerEl && team2TimerEl.getAttribute('data-timer') === 'team2') {
+        if (state === 'team2-running' && scoreboard.team2StartTime) {
+          const elapsed = Date.now() - scoreboard.team2StartTime;
+          team2TimerEl.textContent = formatTime(elapsed);
+          team2TimerEl.classList.add('timer-running');
+        } else {
+          team2TimerEl.textContent = formatTime(scoreboard.team2Timer || 0);
+          team2TimerEl.classList.remove('timer-running');
+        }
+        if (scoreboard.winningTimer === 'team2') {
+          team2TimerEl.classList.add('timer-winner');
+        } else {
+          team2TimerEl.classList.remove('timer-winner');
+        }
+      }
+    }, 50);
+  }
+}
 
 function render(overlay) {
   if (!overlay) return;
@@ -121,6 +197,49 @@ function render(overlay) {
   display.style.color = overlay.settings.fontColor || '#ffffff';
   display.style.textShadow = `2px 2px 4px ${inv}`;
   
+  // Apply corner positioning
+  const corner = overlay.settings?.overlayCorner || 'top-left';
+  const padding = overlay.settings?.overlayPadding !== undefined ? Number(overlay.settings.overlayPadding) : 0;
+  display.style.position = 'fixed';
+  display.style.margin = '0';
+  
+  // Reset all corner positions
+  display.style.top = 'auto';
+  display.style.right = 'auto';
+  display.style.bottom = 'auto';
+  display.style.left = 'auto';
+  
+  // Apply positioning based on selected corner with padding
+  const isRightAligned = corner === 'top-right' || corner === 'bottom-right';
+  switch (corner) {
+    case 'top-left':
+      display.style.top = `${padding}px`;
+      display.style.left = `${padding}px`;
+      break;
+    case 'top-right':
+      display.style.top = `${padding}px`;
+      display.style.right = `${padding}px`;
+      break;
+    case 'bottom-left':
+      display.style.bottom = `${padding}px`;
+      display.style.left = `${padding}px`;
+      break;
+    case 'bottom-right':
+      display.style.bottom = `${padding}px`;
+      display.style.right = `${padding}px`;
+      break;
+  }
+  
+  // For right-aligned, ensure width is fit-content to avoid gaps from min-width
+  if (isRightAligned) {
+    display.style.width = 'fit-content';
+  } else {
+    display.style.width = 'max-content';
+  }
+  
+  // Store alignment for later use in rendering
+  display.dataset.alignment = isRightAligned ? 'right' : 'left';
+  
   // Render scoreboard
   const scoreboard = overlay.scoreboard || {};
   const title = scoreboard.title || '';
@@ -130,6 +249,11 @@ function render(overlay) {
   const team2Score = scoreboard.team2Score !== undefined ? scoreboard.team2Score : 0;
   const winCondition = scoreboard.winCondition || '';
   const showScoreboard = scoreboard.show !== false; // Default to true if not set
+  const oneVOneMode = scoreboard.oneVOneMode === true;
+  const timerState = scoreboard.timerState || 'idle';
+  const team1Timer = scoreboard.team1Timer || 0;
+  const team2Timer = scoreboard.team2Timer || 0;
+  const winningTimer = scoreboard.winningTimer || null;
   
   // Show scoreboard if enabled and there's any relevant data
   if (showScoreboard && (title || team1Name || team2Name || winCondition || team1Score !== 0 || team2Score !== 0)) {
@@ -181,6 +305,27 @@ function render(overlay) {
     team1ScoreDiv.className = 'scoreboard-team-score';
     team1ScoreDiv.textContent = String(team1Score);
     team1Section.appendChild(team1ScoreDiv);
+    
+    if (oneVOneMode) {
+      const team1TimerDiv = document.createElement('div');
+      team1TimerDiv.className = 'scoreboard-team-timer';
+      team1TimerDiv.setAttribute('data-timer', 'team1');
+      if (timerState === 'team1-running' && scoreboard.team1StartTime) {
+        const elapsed = Date.now() - scoreboard.team1StartTime;
+        team1TimerDiv.textContent = formatTime(elapsed);
+        team1TimerDiv.classList.add('timer-running');
+      } else {
+        team1TimerDiv.textContent = formatTime(team1Timer || 0);
+        team1TimerDiv.classList.remove('timer-running');
+      }
+      if (winningTimer === 'team1') {
+        team1TimerDiv.classList.add('timer-winner');
+      } else {
+        team1TimerDiv.classList.remove('timer-winner');
+      }
+      team1Section.appendChild(team1TimerDiv);
+    }
+    
     mainPanel.appendChild(team1Section);
     
     // Center icon
@@ -214,6 +359,28 @@ function render(overlay) {
     team2ScoreDiv.className = 'scoreboard-team-score';
     team2ScoreDiv.textContent = String(team2Score);
     team2Section.appendChild(team2ScoreDiv);
+    
+    // Add timer display for 1v1 mode
+    if (oneVOneMode) {
+      const team2TimerDiv = document.createElement('div');
+      team2TimerDiv.className = 'scoreboard-team-timer';
+      team2TimerDiv.setAttribute('data-timer', 'team2');
+      if (timerState === 'team2-running' && scoreboard.team2StartTime) {
+        const elapsed = Date.now() - scoreboard.team2StartTime;
+        team2TimerDiv.textContent = formatTime(elapsed);
+        team2TimerDiv.classList.add('timer-running');
+      } else {
+        team2TimerDiv.textContent = formatTime(team2Timer || 0);
+        team2TimerDiv.classList.remove('timer-running');
+      }
+      if (winningTimer === 'team2') {
+        team2TimerDiv.classList.add('timer-winner');
+      } else {
+        team2TimerDiv.classList.remove('timer-winner');
+      }
+      team2Section.appendChild(team2TimerDiv);
+    }
+    
     mainPanel.appendChild(team2Section);
     
     scoreboardContainer.appendChild(mainPanel);
@@ -269,7 +436,9 @@ function render(overlay) {
   const alignedLabelWidth = Math.ceil(maxLabelWidth);
   display.style.setProperty('--labelWidth', `${alignedLabelWidth}px`);
   const countColumnStart = avatarWidth + alignedLabelWidth + nameToValueGap;
-  display.style.setProperty('--countColumnWidth', `${countColumnStart}px`);
+  // For right-aligned overlays, set countColumnWidth to 0 to avoid gaps
+  // The alignment will still work because of the margin-left on count-area
+  display.style.setProperty('--countColumnWidth', isRightAligned ? '0px' : `${countColumnStart}px`);
 
   streaks.forEach(s => {
     const row = document.createElement('div');

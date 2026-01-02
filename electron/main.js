@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage, dialog } from 'electron';
+import { app, BrowserWindow, Tray, Menu, nativeImage, dialog, globalShortcut } from 'electron';
 import pkg from 'electron-updater';
 const { autoUpdater } = pkg;
 import express from 'express';
@@ -80,6 +80,7 @@ wss.on('connection', ws => {
       const msg = JSON.parse(data);
       if (msg.type === 'update') {
         latestData = msg.data;
+        updateGlobalShortcut();
         wss.clients.forEach(client => {
           client.send(JSON.stringify({ type: 'update', data: latestData }));
         });
@@ -147,9 +148,26 @@ function createAboutWindow() {
   });
 }
 
+function updateGlobalShortcut() {
+  globalShortcut.unregister('`');
+  
+  if (latestData && latestData.scoreboard && latestData.scoreboard.oneVOneMode === true) {
+    const ret = globalShortcut.register('`', () => {
+      wss.clients.forEach(client => {
+        client.send(JSON.stringify({ type: 'timer-toggle' }));
+      });
+    });
+    
+    if (!ret) {
+      console.log('Global shortcut registration failed');
+    }
+  }
+}
+
 app.whenReady().then(() => {
-  // Ensure Windows uses the packaged app icon for taskbar grouping and shortcuts
   app.setAppUserModelId('com.superdazed.dbd-streak-overlay');
+  
+  updateGlobalShortcut();
 
   // Custom update prompts
   autoUpdater.on('update-downloaded', (_evt, _notes, releaseName) => {
@@ -184,6 +202,10 @@ app.whenReady().then(() => {
 
   // Show About window on every launch
   createAboutWindow();
+});
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
 });
 
 app.on('window-all-closed', e => {
