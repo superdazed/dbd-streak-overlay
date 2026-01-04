@@ -55,13 +55,11 @@ Set up a scoreboard in the dock under the Scoreboard section. You can change the
 
 Toggle "1v1 Mode" to add timers to the scoreboard. Once enabled, use the  <kbd>`</kbd> (backtick) key to start and stop the timers. The timer keybind works on a loop:
 
-- first press: starts Player 1's timer
-- second press: stops Player 1's timer
-- third press: starts Player 2's timer
-- fourth press: stops Player 2's timer, highlights the shortest time in green, adds a point to the player with that time
+- first press: starts Player 1/Survivor's timer
+- second press: stops Survivor timer and swaps player positions (i.e. Survivor becomes Killer)
+- third press: starts Survivor timer
+- fourth press: stops Survivor timer, highlights the longest time in green, adds a point to the player with that time
 - fifth press: resets timers to 0:00.00
-
-<img width="400" alt="Example of 1v1 mode" src="https://github.com/user-attachments/assets/ee13519d-baa0-4a21-9365-ab80fa1c2d7d" />
 
 ### Customize the design
 
