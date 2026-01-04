@@ -51,9 +51,21 @@ To reorder streaks, drag a streak to a new position.
 
 Set up a scoreboard in the dock under the Scoreboard section. You can change the scoreboard color and upload a custom logo to replace the default Dead by Daylight logo (for example, a team logo). Logos with a transparent background work best.
 
+#### 1v1 mode
+
+Toggle "1v1 Mode" to add timers to the scoreboard. Once enabled, use the  <kbd>`</kbd> (backtick) key to start and stop the timers. The timer keybind works on a loop:
+
+- first press: starts Player 1's timer
+- second press: stops Player 1's timer
+- third press: starts Player 2's timer
+- fourth press: stops Player 2's timer, highlights the shortest time in green, adds a point to the player with that time
+- fifth press: resets timers to 0:00.00
+
+<img width="400" alt="Example of 1v1 mode" src="https://github.com/user-attachments/assets/ee13519d-baa0-4a21-9365-ab80fa1c2d7d" />
+
 ### Customize the design
 
-In the dock, select Settings to change the font style, font size, and font color (streaks only).
+In the dock, select Settings to change the font style, font size, font color (streaks only), overlay position, and overlay padding.
 
 To resize the entire overlay, resize the source in your streaming software. Avoid increasing the size there, as it may cause distortion. To make streaks larger, use the font size setting instead.
 
