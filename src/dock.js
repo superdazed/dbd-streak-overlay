@@ -41,6 +41,9 @@ fonts.forEach(f => {
 // Load and normalize character data from bundled JSON (supports multiple shapes)
 characters = normalizeCharacterData(charactersJson);
 
+// Scoreboard reset button (declared early so it can be used in loadFromLocal)
+const scoreboardResetBtn = document.getElementById('scoreboard-reset');
+
 // Ensure DOM is ready before loading data
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', loadFromLocal);
@@ -72,6 +75,7 @@ function defaultOverlay() {
         primaryColor: '#000000',
         secondaryColor: '#4a5568',
         borderRadius: 4,
+        fontSize: 16,
         iconImage: null
       }
     }
@@ -115,7 +119,8 @@ function loadFromLocal() {
       design: parsed.scoreboard.design ? {
         primaryColor: parsed.scoreboard.design.primaryColor !== undefined ? parsed.scoreboard.design.primaryColor : defaults.scoreboard.design.primaryColor,
         secondaryColor: parsed.scoreboard.design.secondaryColor !== undefined ? parsed.scoreboard.design.secondaryColor : defaults.scoreboard.design.secondaryColor,
-        borderRadius: parsed.scoreboard.design.borderRadius !== undefined ? parsed.scoreboard.design.borderRadius : defaults.scoreboard.design.borderRadius
+        borderRadius: parsed.scoreboard.design.borderRadius !== undefined ? parsed.scoreboard.design.borderRadius : defaults.scoreboard.design.borderRadius,
+        fontSize: parsed.scoreboard.design.fontSize !== undefined ? parsed.scoreboard.design.fontSize : defaults.scoreboard.design.fontSize
       } : defaults.scoreboard.design
     } : defaults.scoreboard
   };
@@ -158,12 +163,18 @@ function loadFromLocal() {
     if (oneVOneModeInfo) {
       oneVOneModeInfo.style.display = overlayData.scoreboard.oneVOneMode === true ? 'block' : 'none';
     }
+    if (scoreboardResetBtn) {
+      scoreboardResetBtn.style.display = overlayData.scoreboard.oneVOneMode === true ? 'block' : 'none';
+    }
+    updateScoreboardLabels(overlayData.scoreboard.oneVOneMode === true);
   }
   
   const design = overlayData.scoreboard.design || defaultOverlay().scoreboard.design;
+  const scoreboardFontSizeInput = document.getElementById('scoreboard-font-size');
   if (scoreboardPrimaryColorInput) scoreboardPrimaryColorInput.value = design.primaryColor || '#000000';
   if (scoreboardSecondaryColorInput) scoreboardSecondaryColorInput.value = design.secondaryColor || '#4a5568';
   if (scoreboardBorderRadiusInput) scoreboardBorderRadiusInput.value = design.borderRadius !== undefined ? design.borderRadius : 4;
+  if (scoreboardFontSizeInput) scoreboardFontSizeInput.value = design.fontSize !== undefined ? design.fontSize : 16;
   
   if (design.iconImage && scoreboardIconPreviewImg) {
     const iconSrc = design.iconImage;
@@ -196,6 +207,7 @@ function saveToLocal() {
   const scoreboardPrimaryColorInput = document.getElementById('scoreboard-primary-color');
   const scoreboardSecondaryColorInput = document.getElementById('scoreboard-secondary-color');
   const scoreboardBorderRadiusInput = document.getElementById('scoreboard-border-radius');
+  const scoreboardFontSizeInput = document.getElementById('scoreboard-font-size');
   const scoreboardIconPreviewImg = document.getElementById('scoreboard-icon-preview-img');
   
   let iconImage = null;
@@ -215,6 +227,7 @@ function saveToLocal() {
     primaryColor: scoreboardPrimaryColorInput ? scoreboardPrimaryColorInput.value : '#000000',
     secondaryColor: scoreboardSecondaryColorInput ? scoreboardSecondaryColorInput.value : '#4a5568',
     borderRadius: scoreboardBorderRadiusInput ? Number(scoreboardBorderRadiusInput.value) || 4 : 4,
+    fontSize: scoreboardFontSizeInput ? Number(scoreboardFontSizeInput.value) || 16 : 16,
     iconImage: iconImage
   };
   
@@ -672,23 +685,12 @@ if (team2NameInput) team2NameInput.addEventListener('input', saveToLocal);
 if (team2ScoreInput) team2ScoreInput.addEventListener('input', saveToLocal);
 if (winConditionInput) winConditionInput.addEventListener('input', saveToLocal);
 if (scoreboardShowInput) scoreboardShowInput.addEventListener('change', saveToLocal);
-
-// Scoreboard reset button
-const scoreboardResetBtn = document.getElementById('scoreboard-reset');
 if (scoreboardResetBtn) {
   scoreboardResetBtn.addEventListener('click', () => {
-    const confirmed = window.confirm('Reset scoreboard? This will clear all scores, timers, and timer state. This cannot be undone.');
+    const confirmed = window.confirm('Reset timers? This will clear all timers and timer state. Scores will not be affected.');
     if (!confirmed) return;
     
-    const team1ScoreInput = document.getElementById('scoreboard-team1-score');
-    const team2ScoreInput = document.getElementById('scoreboard-team2-score');
-    
-    if (team1ScoreInput) team1ScoreInput.value = 0;
-    if (team2ScoreInput) team2ScoreInput.value = 0;
-    
     if (overlayData.scoreboard) {
-      overlayData.scoreboard.team1Score = 0;
-      overlayData.scoreboard.team2Score = 0;
       overlayData.scoreboard.team1Timer = 0;
       overlayData.scoreboard.team2Timer = 0;
       overlayData.scoreboard.timerState = 'idle';
@@ -710,6 +712,28 @@ if (scoreboardResetBtn) {
       updateToast.show();
     } catch {}
   });
+  
+  // Initially hide the reset button
+  scoreboardResetBtn.style.display = 'none';
+}
+
+function updateScoreboardLabels(is1v1Mode) {
+  const team1NameLabel = document.getElementById('scoreboard-team1-name-label');
+  const team1ScoreLabel = document.getElementById('scoreboard-team1-score-label');
+  const team2NameLabel = document.getElementById('scoreboard-team2-name-label');
+  const team2ScoreLabel = document.getElementById('scoreboard-team2-score-label');
+  
+  if (is1v1Mode) {
+    if (team1NameLabel) team1NameLabel.textContent = 'Survivor Name';
+    if (team1ScoreLabel) team1ScoreLabel.textContent = 'Survivor Score';
+    if (team2NameLabel) team2NameLabel.textContent = 'Killer Name';
+    if (team2ScoreLabel) team2ScoreLabel.textContent = 'Killer Score';
+  } else {
+    if (team1NameLabel) team1NameLabel.textContent = 'Team 1 Name';
+    if (team1ScoreLabel) team1ScoreLabel.textContent = 'Team 1 Score';
+    if (team2NameLabel) team2NameLabel.textContent = 'Team 2 Name';
+    if (team2ScoreLabel) team2ScoreLabel.textContent = 'Team 2 Score';
+  }
 }
 
 const scoreboard1v1ModeInput = document.getElementById('scoreboard-1v1-mode');
@@ -728,6 +752,10 @@ if (scoreboard1v1ModeInput) {
     if (oneVOneModeInfo) {
       oneVOneModeInfo.style.display = scoreboard1v1ModeInput.checked ? 'block' : 'none';
     }
+    if (scoreboardResetBtn) {
+      scoreboardResetBtn.style.display = scoreboard1v1ModeInput.checked ? 'block' : 'none';
+    }
+    updateScoreboardLabels(scoreboard1v1ModeInput.checked);
     saveToLocal();
     ws.send(JSON.stringify({ type: 'update', data: overlayData }));
   });
@@ -752,8 +780,6 @@ function startTimerUpdate() {
     
     if (timerState === 'team1-running' && overlayData.scoreboard.team1StartTime) {
       overlayData.scoreboard.team1Timer = now - overlayData.scoreboard.team1StartTime;
-    } else if (timerState === 'team2-running' && overlayData.scoreboard.team2StartTime) {
-      overlayData.scoreboard.team2Timer = now - overlayData.scoreboard.team2StartTime;
     } else {
       if (timerUpdateInterval) {
         clearInterval(timerUpdateInterval);
@@ -796,50 +822,83 @@ function handleTimerToggle() {
     }
     
   } else if (timerState === 'team1-running') {
-    overlayData.scoreboard.team1Timer = now - overlayData.scoreboard.team1StartTime;
-    overlayData.scoreboard.timerState = 'team1-stopped';
-    overlayData.scoreboard.team1StartTime = null;
-    if (timerUpdateInterval) {
-      clearInterval(timerUpdateInterval);
-      timerUpdateInterval = null;
+    // Check if this is the first run (before swap) or second run (after swap)
+    // If team2Timer > 0, we've already done the first run and swap, so this is the second run
+    const hasCompletedFirstRun = (overlayData.scoreboard.team2Timer || 0) > 0;
+    
+    if (!hasCompletedFirstRun) {
+      // First run: Stop timer, save to team2Timer (will become Player 1's time after swap)
+      const firstPlayerTime = now - overlayData.scoreboard.team1StartTime;
+      overlayData.scoreboard.timerState = 'team1-stopped';
+      overlayData.scoreboard.team1StartTime = null;
+      
+      // Swap player positions: Player 1 becomes Player 2, Player 2 becomes Player 1
+      const team1NameInput = document.getElementById('scoreboard-team1-name');
+      const team1ScoreInput = document.getElementById('scoreboard-team1-score');
+      const team2NameInput = document.getElementById('scoreboard-team2-name');
+      const team2ScoreInput = document.getElementById('scoreboard-team2-score');
+      
+      const tempName = overlayData.scoreboard.team1Name;
+      const tempScore = overlayData.scoreboard.team1Score;
+      
+      overlayData.scoreboard.team1Name = overlayData.scoreboard.team2Name;
+      overlayData.scoreboard.team1Score = overlayData.scoreboard.team2Score;
+      overlayData.scoreboard.team1Timer = 0; // Reset for second player's timer
+      
+      overlayData.scoreboard.team2Name = tempName;
+      overlayData.scoreboard.team2Score = tempScore;
+      overlayData.scoreboard.team2Timer = firstPlayerTime; // Save first player's time
+      
+      // Update input fields to reflect the swap
+      if (team1NameInput) team1NameInput.value = overlayData.scoreboard.team1Name;
+      if (team1ScoreInput) team1ScoreInput.value = overlayData.scoreboard.team1Score;
+      if (team2NameInput) team2NameInput.value = overlayData.scoreboard.team2Name;
+      if (team2ScoreInput) team2ScoreInput.value = overlayData.scoreboard.team2Score;
+      
+      if (timerUpdateInterval) {
+        clearInterval(timerUpdateInterval);
+        timerUpdateInterval = null;
+      }
+    } else {
+      // Second run: Stop timer and determine winner
+      overlayData.scoreboard.team1Timer = now - overlayData.scoreboard.team1StartTime;
+      overlayData.scoreboard.team1StartTime = null;
+      
+      // After swap: team1Timer is Player 2's time (current), team2Timer is Player 1's time (from first run)
+      const team1Time = overlayData.scoreboard.team1Timer;
+      const team2Time = overlayData.scoreboard.team2Timer;
+      
+      if (team1Time > team2Time) {
+        overlayData.scoreboard.team1Score = (overlayData.scoreboard.team1Score || 0) + 1;
+        if (team1ScoreInput) team1ScoreInput.value = overlayData.scoreboard.team1Score;
+        overlayData.scoreboard.winningTimer = 'team1';
+      } else if (team2Time > team1Time) {
+        overlayData.scoreboard.team2Score = (overlayData.scoreboard.team2Score || 0) + 1;
+        if (team2ScoreInput) team2ScoreInput.value = overlayData.scoreboard.team2Score;
+        overlayData.scoreboard.winningTimer = 'team2';
+      } else {
+        overlayData.scoreboard.winningTimer = null;
+      }
+      
+      overlayData.scoreboard.timerState = 'idle';
+      if (timerUpdateInterval) {
+        clearInterval(timerUpdateInterval);
+        timerUpdateInterval = null;
+      }
     }
     
   } else if (timerState === 'team1-stopped') {
-    overlayData.scoreboard.timerState = 'team2-running';
-    overlayData.scoreboard.team2StartTime = now;
-    overlayData.scoreboard.team2Timer = 0;
-    overlayData.scoreboard.team1StartTime = null;
-    
-  } else if (timerState === 'team2-running') {
-    overlayData.scoreboard.team2Timer = now - overlayData.scoreboard.team2StartTime;
+    // Start timing the player now in position 1 (survivor position) after swap
+    overlayData.scoreboard.timerState = 'team1-running';
+    overlayData.scoreboard.team1StartTime = now;
+    overlayData.scoreboard.team1Timer = 0;
     overlayData.scoreboard.team2StartTime = null;
-    
-    const team1Time = overlayData.scoreboard.team1Timer;
-    const team2Time = overlayData.scoreboard.team2Timer;
-    
-    if (team1Time < team2Time) {
-      overlayData.scoreboard.team1Score = (overlayData.scoreboard.team1Score || 0) + 1;
-      if (team1ScoreInput) team1ScoreInput.value = overlayData.scoreboard.team1Score;
-      overlayData.scoreboard.winningTimer = 'team1';
-    } else if (team2Time < team1Time) {
-      overlayData.scoreboard.team2Score = (overlayData.scoreboard.team2Score || 0) + 1;
-      if (team2ScoreInput) team2ScoreInput.value = overlayData.scoreboard.team2Score;
-      overlayData.scoreboard.winningTimer = 'team2';
-    } else {
-      overlayData.scoreboard.winningTimer = null;
-    }
-    
-    overlayData.scoreboard.timerState = 'idle';
-    if (timerUpdateInterval) {
-      clearInterval(timerUpdateInterval);
-      timerUpdateInterval = null;
-    }
   }
   
   saveToLocal();
   ws.send(JSON.stringify({ type: 'update', data: overlayData }));
   
-  if (overlayData.scoreboard.timerState === 'team1-running' || overlayData.scoreboard.timerState === 'team2-running') {
+  if (overlayData.scoreboard.timerState === 'team1-running') {
     startTimerUpdate();
   }
 }
@@ -855,7 +914,7 @@ document.addEventListener('keydown', (e) => {
 
 if (overlayData.scoreboard && overlayData.scoreboard.oneVOneMode) {
   const timerState = overlayData.scoreboard.timerState;
-  if (timerState === 'team1-running' || timerState === 'team2-running') {
+  if (timerState === 'team1-running') {
     startTimerUpdate();
   }
 }
@@ -935,6 +994,15 @@ if (saveScoreboardSettingsBtn) {
     // Close modal
     const modal = bootstrap.Modal.getInstance(document.getElementById('scoreboardSettingsModal'));
     if (modal) modal.hide();
+  });
+}
+
+// Add event listener for scoreboard font size input
+const scoreboardFontSizeInput = document.getElementById('scoreboard-font-size');
+if (scoreboardFontSizeInput) {
+  scoreboardFontSizeInput.addEventListener('input', () => {
+    saveToLocal();
+    ws.send(JSON.stringify({ type: 'update', data: overlayData }));
   });
 }
 

@@ -3,11 +3,11 @@ import charactersJson from './characters.json';
 const ws = new WebSocket(`ws://${window.location.host}`);
 const display = document.getElementById('display');
 
-// Eagerly import character images so Vite copies them to dist and gives us URLs
 const killerAssets = import.meta.glob('./assets/characters/killers/*.webp', { eager: true, as: 'url' });
 const survivorAssets = import.meta.glob('./assets/characters/survivors/*.webp', { eager: true, as: 'url' });
-// Import default logo
 const defaultLogo = new URL('./assets/dbd-logo.png', import.meta.url).href;
+const survivorIcon = new URL('./assets/icon-survivor.png', import.meta.url).href;
+const killerIcon = new URL('./assets/icon-killer.png', import.meta.url).href;
 
 function buildAssetMap(assets) {
   const map = {};
@@ -136,7 +136,7 @@ function updateTimerInterval() {
   }
   
   const timerState = currentOverlayData.scoreboard.timerState;
-  if (timerState === 'team1-running' || timerState === 'team2-running') {
+  if (timerState === 'team1-running') {
     timerUpdateInterval = setInterval(() => {
       const team1TimerEl = document.querySelector('.scoreboard-team-timer[data-timer="team1"]');
       const team2TimerEl = document.querySelector('.scoreboard-team-timer[data-timer="team2"]');
@@ -269,6 +269,10 @@ function render(overlay) {
     const primaryColor = design.primaryColor || '#000000';
     const secondaryColor = design.secondaryColor || '#4a5568';
     const borderRadius = design.borderRadius !== undefined ? design.borderRadius : 4;
+    const fontSize = design.fontSize !== undefined ? design.fontSize : 16;
+    
+    // Apply base font size to scoreboard container (use !important to override parent)
+    scoreboardContainer.style.setProperty('font-size', `${fontSize}px`, 'important');
     
     // Title box (if title exists)
     if (title) {
@@ -297,6 +301,15 @@ function render(overlay) {
     // Team A section (left)
     const team1Section = document.createElement('div');
     team1Section.className = 'scoreboard-team-section';
+    
+    if (oneVOneMode) {
+      const team1Icon = document.createElement('img');
+      team1Icon.src = survivorIcon;
+      team1Icon.className = 'scoreboard-team-icon';
+      team1Icon.alt = 'Survivor';
+      team1Section.appendChild(team1Icon);
+    }
+    
     const team1NameDiv = document.createElement('div');
     team1NameDiv.className = 'scoreboard-team-name';
     team1NameDiv.textContent = team1Name || 'Team A';
@@ -351,6 +364,15 @@ function render(overlay) {
     // Team B section (right)
     const team2Section = document.createElement('div');
     team2Section.className = 'scoreboard-team-section';
+    
+    if (oneVOneMode) {
+      const team2Icon = document.createElement('img');
+      team2Icon.src = killerIcon;
+      team2Icon.className = 'scoreboard-team-icon';
+      team2Icon.alt = 'Killer';
+      team2Section.appendChild(team2Icon);
+    }
+    
     const team2NameDiv = document.createElement('div');
     team2NameDiv.className = 'scoreboard-team-name';
     team2NameDiv.textContent = team2Name || 'Team B';

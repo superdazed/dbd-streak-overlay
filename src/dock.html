@@ -65,25 +65,25 @@
             <div class="col-md-6">
               <div class="form-floating">
                 <input type="text" class="form-control" id="scoreboard-team1-name" placeholder="Team 1 Name">
-                <label for="scoreboard-team1-name">Team/Player 1 Name</label>
+                <label for="scoreboard-team1-name" id="scoreboard-team1-name-label">Team 1 Name</label>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-floating">
                 <input type="number" class="form-control" id="scoreboard-team1-score" placeholder="Team 1 Score" min="0">
-                <label for="scoreboard-team1-score">Team/Player 1 Score</label>
+                <label for="scoreboard-team1-score" id="scoreboard-team1-score-label">Team 1 Score</label>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-floating">
                 <input type="text" class="form-control" id="scoreboard-team2-name" placeholder="Team 2 Name">
-                <label for="scoreboard-team2-name">Team/Player 2 Name</label>
+                <label for="scoreboard-team2-name" id="scoreboard-team2-name-label">Team 2 Name</label>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-floating">
                 <input type="number" class="form-control" id="scoreboard-team2-score" placeholder="Team 2 Score" min="0">
-                <label for="scoreboard-team2-score">Team/Player 2 Score</label>
+                <label for="scoreboard-team2-score" id="scoreboard-team2-score-label">Team 2 Score</label>
               </div>
             </div>
             <div class="col-12">
@@ -94,7 +94,20 @@
             </div>
             <div class="col-12">
               <div class="alert alert-info mb-0" id="1v1-mode-info" style="display: none;">
-                <small><strong>1v1 Timer Mode:</strong> Press <kbd>`</kbd> to start/stop the timers. First press starts Player 1, second stops Player 1, third starts Player 2, fourth stops Player 2 and awards point to faster player, fifth resets the timers to 0:00.00.</small>
+                <small><strong><u>1v1 Timer Mode</u></strong></small>
+                <br>
+                <small>Press <kbd>`</kbd> to start/stop the timers.
+                  <br>
+                  <br>
+                  <ul>
+                    <li>First press: starts Player 1/Survivor timer</li>
+                    <li>Second press: stops Survivor timer and swaps player positions</li>
+                    <li>Third press: starts Survivor timer</li>
+                    <li>Fourth press: stops Survivor timer and awards point to the player with the <strong>longest time</strong></li>
+                    <li>Fifth press: resets the timers to 0:00.00</li>
+                  </ul>
+                </small>
+                <small>In the event of a tie, no points are awarded.</small>
               </div>
             </div>
           </div>
@@ -186,6 +199,11 @@
                 <label class="form-label">Border Radius (px)</label>
                 <input type="number" class="form-control" id="scoreboard-border-radius" value="4" min="0" max="50">
                 <small class="text-body-secondary">Corner rounding</small>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Font Size (px)</label>
+                <input type="number" class="form-control" id="scoreboard-font-size" value="16" min="1" max="100">
+                <small class="text-body-secondary">Base font size for scoreboard</small>
               </div>
               <div class="col-12">
                 <label class="form-label">Icon Image</label>
