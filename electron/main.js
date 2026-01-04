@@ -57,6 +57,43 @@ appServer.get('/version', (_req, res) => {
     res.status(500).json({ version: null });
   }
 });
+// Fetch release notes from GitHub
+appServer.get('/api/release-notes', async (_req, res) => {
+  try {
+    const currentVersion = app.getVersion();
+    const repo = 'superdazed/dbd-streak-overlay';
+    
+    // Try to fetch release by tag (e.g., v0.3.0)
+    let releaseUrl = `https://api.github.com/repos/${repo}/releases/tags/v${currentVersion}`;
+    let response = await fetch(releaseUrl);
+    
+    // If tag doesn't exist, try without 'v' prefix
+    if (!response.ok) {
+      releaseUrl = `https://api.github.com/repos/${repo}/releases/tags/${currentVersion}`;
+      response = await fetch(releaseUrl);
+    }
+    
+    // If still not found, try to get the latest release
+    if (!response.ok) {
+      releaseUrl = `https://api.github.com/repos/${repo}/releases/latest`;
+      response = await fetch(releaseUrl);
+    }
+    
+    if (!response.ok) {
+      throw new Error(`GitHub API returned ${response.status}`);
+    }
+    
+    const release = await response.json();
+    res.json({ 
+      ok: true, 
+      body: release.body || '',
+      tagName: release.tag_name || '',
+      publishedAt: release.published_at || ''
+    });
+  } catch (error) {
+    res.status(500).json({ ok: false, error: String(error) });
+  }
+});
 function logAddress() {
   port = server.address().port;
   console.log(`Server running at http://localhost:${port}`);
@@ -134,10 +171,10 @@ function createAboutWindow() {
     return;
   }
   aboutWin = new BrowserWindow({
-    width: 700,
-    height: 620,
-    minWidth: 500,
-    minHeight: 380,
+    width: 800,
+    height: 650,
+    minWidth: 800,
+    minHeight: 650,
     autoHideMenuBar: true,
     icon: getIconPath()
   });
