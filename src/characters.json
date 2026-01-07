@@ -51,8 +51,18 @@
       "type": "survivor"
     },
     {
+      "name": "Dustin Henderson",
+      "image": "dustin-henderson",
+      "type": "survivor"
+    },
+    {
       "name": "Dwight Fairfield",
       "image": "dwight-fairfield",
+      "type": "survivor"
+    },
+    {
+      "name": "Eleven",
+      "image": "eleven",
       "type": "survivor"
     },
     {
@@ -300,6 +310,11 @@
     {
       "name": "The Executioner",
       "image": "the-executioner",
+      "type": "killer"
+    },
+    {
+      "name": "The First",
+      "image": "the-first",
       "type": "killer"
     },
     {
