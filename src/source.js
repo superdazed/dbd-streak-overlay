@@ -463,6 +463,9 @@ function render(overlay) {
   display.style.setProperty('--countColumnWidth', isRightAligned ? '0px' : `${countColumnStart}px`);
 
   streaks.forEach(s => {
+    const block = document.createElement('div');
+    block.className = 'streak-block';
+
     const row = document.createElement('div');
     row.className = 'streak-row';
 
@@ -477,7 +480,16 @@ function render(overlay) {
       row.appendChild(avatar);
     }
 
-    // Column 2: label
+    // Content column: label + count on first line, badges directly below
+    const contentCol = document.createElement('div');
+    contentCol.className = 'streak-content';
+
+    const textRow = document.createElement('div');
+    textRow.className = 'streak-text';
+    if (hasAnyAvatar && !hasAvatar) {
+      textRow.style.marginLeft = `${avatarWidth}px`;
+    }
+
     const labelText = document.createElement('span');
     labelText.style.alignSelf = 'center';
     const label = s.type === 'Killer'
@@ -487,28 +499,44 @@ function render(overlay) {
         : s.other || '';
     labelText.textContent = label;
     labelText.className = 'label';
-    if (hasAnyAvatar && !hasAvatar) {
-      row.classList.add('no-avatar');
-      row.style.setProperty('--nameOffset', `${avatarWidth}px`);
-    }
-    row.appendChild(labelText);
+    textRow.appendChild(labelText);
 
-    // Column 3: count + optional badge
     const countArea = document.createElement('span');
     countArea.className = 'count-area';
     countArea.style.alignSelf = 'center';
+    if (s.countMarginZero === true) {
+      countArea.style.marginLeft = '-5px';
+    }
     const countText = document.createElement('span');
     countText.className = 'count';
-    countText.textContent = String(s.count || 0);
+    countText.textContent = s.count !== undefined && s.count !== null ? String(s.count) : '0';
     countArea.appendChild(countText);
-    if (s.record && s.recordLabel) {
-      const badge = document.createElement('span');
-      badge.className = 'badge';
-      badge.innerHTML = `<b style="margin-right: 6px;">${s.recordLabel}</b> ${s.record}`;
-      countArea.appendChild(badge);
-    }
-    row.appendChild(countArea);
+    textRow.appendChild(countArea);
 
-    display.appendChild(row);
+    contentCol.appendChild(textRow);
+
+    const pairs = Array.isArray(s.recordPairs) && s.recordPairs.length > 0
+      ? s.recordPairs
+      : (s.record != null || s.recordLabel) ? [{ label: s.recordLabel || '', value: s.record }] : [];
+    if (pairs.some(p => p.label || (p.value !== undefined && p.value !== null && p.value !== ''))) {
+      const badgesRow = document.createElement('div');
+      badgesRow.className = 'streak-badges';
+      if (hasAnyAvatar && !hasAvatar) {
+        badgesRow.style.marginLeft = `${avatarWidth}px`;
+      }
+      pairs.forEach(p => {
+        if (p.label || (p.value !== undefined && p.value !== null && p.value !== '')) {
+          const badge = document.createElement('span');
+          badge.className = 'badge';
+          badge.innerHTML = `<b style="margin-right: 6px;">${p.label || ''}</b> ${p.value !== undefined && p.value !== null ? p.value : ''}`;
+          badgesRow.appendChild(badge);
+        }
+      });
+      contentCol.appendChild(badgesRow);
+    }
+
+    row.appendChild(contentCol);
+    block.appendChild(row);
+    display.appendChild(block);
   });
 }

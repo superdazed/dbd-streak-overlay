@@ -10,20 +10,34 @@
         display: inline-block;
         width: max-content;
       }
+      .streak-block { margin-bottom: 8px; }
       .streak-row {
         display: flex;
         align-items: center;
-        gap: 10px; /* image -> label gap */
-        margin-bottom: 8px;
+        gap: 10px;
       }
-      .avatar { width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; }
+      .avatar { width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
       .avatar img { width: 120px; height: 120px; display: block; }
+      .streak-content {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+      }
+      .streak-text {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
       .label { display: inline-block; min-width: var(--labelWidth, 0px); font-weight: 300; }
-      .streak-row.no-avatar .label { margin-left: var(--nameOffset, 0px); }
       .count-area { display: inline-flex; align-items: center; margin-left: 14px; min-width: var(--countColumnWidth, 0px); justify-content: flex-start; }
       .count-area .count { font-weight: 500; }
+      .streak-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
       .badge {
-        margin-left: 12px;
         padding: 4px 8px;
         border-radius: 2px;
         background: rgba(0,0,0,0.5);

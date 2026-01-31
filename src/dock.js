@@ -253,17 +253,24 @@ function saveToLocal() {
       const otherInput = row.querySelector('.other-input');
       const showCheckbox = row.querySelector('.show-checkbox');
       const showImageCheckbox = row.querySelector('.show-image-checkbox');
+      const countMarginZeroCheckbox = row.querySelector('.count-margin-zero');
+      const recordPairs = Array.from(row.querySelectorAll('.record-pair')).map(pairEl => {
+        const label = (pairEl.querySelector('.record-label') && pairEl.querySelector('.record-label').value) || '';
+        const val = pairEl.querySelector('.record-input') && pairEl.querySelector('.record-input').value;
+        const value = val === '' || val === undefined ? null : Number(val);
+        return { label, value };
+      });
       return {
         type,
         killer: type === 'Killer' ? selected : '',
         survivor: survivorSel ? survivorSel.value : '',
         other: otherInput ? otherInput.value : '',
         displayLabel: type === 'Survivor' && otherInput ? otherInput.value : '',
-        count: Number(row.querySelector('.count-input').value) || 0,
-        record: row.querySelector('.record-input').value ? Number(row.querySelector('.record-input').value) : null,
-        recordLabel: row.querySelector('.record-label').value,
+        count: (row.querySelector('.count-input').value ?? '').trim(),
+        recordPairs,
         show: !!(showCheckbox && showCheckbox.checked),
-        showImage: !!(showImageCheckbox && showImageCheckbox.checked)
+        showImage: !!(showImageCheckbox && showImageCheckbox.checked),
+        countMarginZero: !!(countMarginZeroCheckbox && countMarginZeroCheckbox.checked)
       };
     }),
     scoreboard: {
@@ -326,7 +333,10 @@ function addStreak(data = {}) {
   charLbl.textContent = 'Character / Type';
   charWrap.appendChild(charSel);
   charWrap.appendChild(charLbl);
-  row.appendChild(charWrap);
+
+  const streakIdentity = document.createElement('div');
+  streakIdentity.className = 'streak-section streak-identity';
+  streakIdentity.appendChild(charWrap);
 
   const survivorWrap = document.createElement('div');
   survivorWrap.className = 'form-floating';
@@ -351,7 +361,7 @@ function addStreak(data = {}) {
   survivorWrap.appendChild(survivorSel);
   survivorWrap.appendChild(survivorLbl);
   survivorWrap.style.display = 'none';
-  row.appendChild(survivorWrap);
+  streakIdentity.appendChild(survivorWrap);
 
   const otherWrap = document.createElement('div');
   otherWrap.className = 'form-floating';
@@ -363,24 +373,21 @@ function addStreak(data = {}) {
   otherLbl.textContent = 'Streak Name';
   otherWrap.appendChild(otherInput);
   otherWrap.appendChild(otherLbl);
-  row.appendChild(otherWrap);
+  streakIdentity.appendChild(otherWrap);
 
-  // Show on stream checkbox
-  const showWrap = document.createElement('label');
-  showWrap.className = 'form-check form-switch w-100 my-0';
+  // Show on stream: hidden checkbox, controlled by Show/Hide buttons in footer
   const showCheckbox = document.createElement('input');
   showCheckbox.type = 'checkbox';
   showCheckbox.className = 'show-checkbox form-check-input';
-  showWrap.appendChild(showCheckbox);
-  const showLbl = document.createElement('span');
-  showLbl.className = 'form-check-label ms-1';
-  showLbl.textContent = 'Show on stream';
-  showWrap.appendChild(showLbl);
-  row.appendChild(showWrap);
+  showCheckbox.style.display = 'none';
 
-  // Show image checkbox (visible for all selections)
+  // Display options: toggles (secondary — styled smaller in CSS)
+  const streakDisplayOptions = document.createElement('div');
+  streakDisplayOptions.className = 'streak-options-row';
+  streakDisplayOptions.appendChild(showCheckbox);
+
   const showImageWrap = document.createElement('label');
-  showImageWrap.className = 'form-check form-switch w-100 my-0';
+  showImageWrap.className = 'form-check form-switch my-0';
   const showImageCheckbox = document.createElement('input');
   showImageCheckbox.type = 'checkbox';
   showImageCheckbox.className = 'show-image-checkbox form-check-input';
@@ -389,26 +396,59 @@ function addStreak(data = {}) {
   showImgLbl.className = 'form-check-label ms-1';
   showImgLbl.textContent = 'Show image';
   showImageWrap.appendChild(showImgLbl);
-  row.appendChild(showImageWrap);
+  streakDisplayOptions.appendChild(showImageWrap);
+
+  const countMarginWrap = document.createElement('label');
+  countMarginWrap.className = 'form-check form-switch my-0';
+  const countMarginCheckbox = document.createElement('input');
+  countMarginCheckbox.type = 'checkbox';
+  countMarginCheckbox.className = 'count-margin-zero form-check-input';
+  countMarginWrap.appendChild(countMarginCheckbox);
+  const countMarginLbl = document.createElement('span');
+  countMarginLbl.className = 'form-check-label ms-1';
+  countMarginLbl.textContent = 'No gap between streak name and count';
+  countMarginWrap.appendChild(countMarginLbl);
+  streakDisplayOptions.appendChild(countMarginWrap);
+
+  // Returns true if the count value supports the +1 button (single integer or "x/n" format)
+  function isIncrementableCount(val) {
+    const s = String(val ?? '').trim();
+    return /^\d+$/.test(s) || /^\d+\/\d+$/.test(s);
+  }
+
+  function updateIncrementButtonVisibility() {
+    incWrap.style.display = isIncrementableCount(countInput.value) ? '' : 'none';
+  }
 
   const countGroup = document.createElement('div');
   countGroup.className = 'input-group';
   const countInput = document.createElement('input');
-  countInput.type = 'number';
+  countInput.type = 'text';
   countInput.className = 'count-input form-control';
-  countInput.value = data.count || 0;
+  countInput.placeholder = 'Count or e.g. 3/5';
+  countInput.value = data.count !== undefined && data.count !== null ? String(data.count) : '';
   const incBtn = document.createElement('button');
+  let incWrap; // declared so updateIncrementButtonVisibility can reference it
   incBtn.textContent = '+';
   incBtn.className = 'btn btn-success';
   incBtn.addEventListener('click', () => {
-    const currentCount = Number(countInput.value) || 0;
-    const recordRaw = recordInput.value;
-    const recordNum = recordRaw === '' ? null : Number(recordRaw);
-    const shouldBumpRecord = recordNum !== null && Number.isFinite(recordNum) && currentCount === recordNum;
+    const raw = String(countInput.value).trim();
 
-    countInput.value = currentCount + 1;
-    if (shouldBumpRecord) {
-      recordInput.value = String(recordNum + 1);
+    if (/^\d+$/.test(raw)) {
+      const currentCount = Number(raw) || 0;
+      countInput.value = currentCount + 1;
+      row.querySelectorAll('.record-pair .record-input').forEach(recordInputEl => {
+        const v = recordInputEl.value === '' ? null : Number(recordInputEl.value);
+        if (v !== null && Number.isFinite(v) && v === currentCount) {
+          recordInputEl.value = String(v + 1);
+        }
+      });
+    } else {
+      const m = raw.match(/^(\d+)\/(\d+)$/);
+      if (m) {
+        const x = parseInt(m[1], 10);
+        countInput.value = `${x + 1}/${m[2]}`;
+      }
     }
     saveToLocal();
     ws.send(JSON.stringify({ type: 'update', data: overlayData }));
@@ -417,47 +457,145 @@ function addStreak(data = {}) {
       updateToast.show();
     } catch {}
   });
-  const incWrap = document.createElement('span');
+  incWrap = document.createElement('span');
   incWrap.className = 'input-group-text p-0';
   incWrap.appendChild(incBtn);
   countGroup.appendChild(countInput);
   countGroup.appendChild(incWrap);
-  row.appendChild(countGroup);
+  updateIncrementButtonVisibility();
 
-  const recordGroup = document.createElement('div');
-  recordGroup.className = 'input-group';
-  const recordLabelWrap = document.createElement('div');
-  recordLabelWrap.className = 'form-floating';
-  const recordLabel = document.createElement('input');
-  recordLabel.type = 'text';
-  recordLabel.className = 'record-label form-control';
-  recordLabel.placeholder = 'Record/Target Label';
-  const recordLabelLbl = document.createElement('label');
-  recordLabelLbl.textContent = 'Record/Target Label';
-  recordLabelWrap.appendChild(recordLabel);
-  recordLabelWrap.appendChild(recordLabelLbl);
-  const recordInputWrap = document.createElement('div');
-  recordInputWrap.className = 'form-floating';
-  const recordInput = document.createElement('input');
-  recordInput.type = 'number';
-  recordInput.className = 'record-input form-control';
-  recordInput.placeholder = 'Record/Target Value';
-  const recordInputLbl = document.createElement('label');
-  recordInputLbl.textContent = 'Record/Target Value';
-  recordInputWrap.appendChild(recordInput);
-  recordInputWrap.appendChild(recordInputLbl);
-  recordGroup.appendChild(recordLabelWrap);
-  recordGroup.appendChild(recordInputWrap);
-  row.appendChild(recordGroup);
+  const streakCountWrap = document.createElement('div');
+  streakCountWrap.className = 'streak-count-wrap';
+  streakCountWrap.appendChild(countGroup);
 
-  const delBtn = document.createElement('button');
-  delBtn.textContent = 'Delete Streak';
-  delBtn.className = 'delete btn btn-sm btn-outline-danger ms-auto';
-  delBtn.addEventListener('click', () => {
+  const streakHeader = document.createElement('div');
+  streakHeader.className = 'streak-section streak-header';
+  streakHeader.appendChild(streakIdentity);
+  streakHeader.appendChild(streakCountWrap);
+  row.appendChild(streakHeader);
+
+  const detailsDisplay = document.createElement('details');
+  detailsDisplay.className = 'streak-details';
+  const summaryDisplay = document.createElement('summary');
+  summaryDisplay.textContent = 'Display options';
+  detailsDisplay.appendChild(summaryDisplay);
+  const bodyDisplay = document.createElement('div');
+  bodyDisplay.className = 'streak-details-body';
+  bodyDisplay.appendChild(streakDisplayOptions);
+  detailsDisplay.appendChild(bodyDisplay);
+  row.appendChild(detailsDisplay);
+
+  const recordPairsContainer = document.createElement('div');
+  recordPairsContainer.className = 'record-pairs streak-records-list';
+  recordPairsContainer.style.display = 'flex';
+  recordPairsContainer.style.flexWrap = 'wrap';
+  recordPairsContainer.style.gap = '.5rem';
+  recordPairsContainer.style.alignItems = 'flex-start';
+
+  function addRecordPair(pairData = {}) {
+    const pairRow = document.createElement('div');
+    pairRow.className = 'record-pair input-group';
+    pairRow.style.flexWrap = 'nowrap';
+    const recordLabelWrap = document.createElement('div');
+    recordLabelWrap.className = 'form-floating';
+    const pairRecordLabel = document.createElement('input');
+    pairRecordLabel.type = 'text';
+    pairRecordLabel.className = 'record-label form-control';
+    pairRecordLabel.placeholder = 'Record/Target Label';
+    const recordLabelLbl = document.createElement('label');
+    recordLabelLbl.textContent = 'Record/Target Label';
+    recordLabelWrap.appendChild(pairRecordLabel);
+    recordLabelWrap.appendChild(recordLabelLbl);
+    const recordInputWrap = document.createElement('div');
+    recordInputWrap.className = 'form-floating';
+    const pairRecordInput = document.createElement('input');
+    pairRecordInput.type = 'number';
+    pairRecordInput.className = 'record-input form-control';
+    pairRecordInput.placeholder = 'Record/Target Value';
+    const recordInputLbl = document.createElement('label');
+    recordInputLbl.textContent = 'Record/Target Value';
+    recordInputWrap.appendChild(pairRecordInput);
+    recordInputWrap.appendChild(recordInputLbl);
+    const removePairBtn = document.createElement('button');
+    removePairBtn.type = 'button';
+    removePairBtn.className = 'btn btn-outline-secondary';
+    removePairBtn.textContent = 'Remove';
+    removePairBtn.addEventListener('click', () => {
+      pairRow.remove();
+      saveToLocal();
+    });
+    pairRow.appendChild(recordLabelWrap);
+    pairRow.appendChild(recordInputWrap);
+    pairRow.appendChild(removePairBtn);
+    recordPairsContainer.appendChild(pairRow);
+    pairRecordLabel.value = pairData.label ?? '';
+    pairRecordInput.value = pairData.value !== undefined && pairData.value !== null ? String(pairData.value) : '';
+    pairRecordLabel.addEventListener('input', saveToLocal);
+    pairRecordInput.addEventListener('input', saveToLocal);
+  }
+
+  const addRecordPairBtn = document.createElement('button');
+  addRecordPairBtn.type = 'button';
+  addRecordPairBtn.className = 'btn btn-sm btn-outline-primary';
+  addRecordPairBtn.textContent = 'Add record/target';
+  addRecordPairBtn.addEventListener('click', () => {
+    addRecordPair();
+    saveToLocal();
+  });
+
+  const detailsRecords = document.createElement('details');
+  detailsRecords.className = 'streak-details';
+  const summaryRecords = document.createElement('summary');
+  summaryRecords.textContent = 'Records';
+  detailsRecords.appendChild(summaryRecords);
+  const bodyRecords = document.createElement('div');
+  bodyRecords.className = 'streak-details-body';
+  bodyRecords.appendChild(recordPairsContainer);
+  bodyRecords.appendChild(addRecordPairBtn);
+  detailsRecords.appendChild(bodyRecords);
+  row.appendChild(detailsRecords);
+
+  const streakFooter = document.createElement('div');
+  streakFooter.className = 'streak-footer';
+  const showBtn = document.createElement('button');
+  showBtn.type = 'button';
+  showBtn.className = 'btn btn-sm btn-outline-success';
+  showBtn.textContent = 'Show';
+  showBtn.addEventListener('click', () => {
+    showCheckbox.checked = true;
+    saveToLocal();
+    ws.send(JSON.stringify({ type: 'update', data: overlayData }));
+    try {
+      updateToast = updateToast || new bootstrap.Toast(updateToastEl);
+      updateToast.show();
+    } catch {}
+  });
+  const hideBtn = document.createElement('button');
+  hideBtn.type = 'button';
+  hideBtn.className = 'btn btn-sm btn-outline-secondary';
+  hideBtn.textContent = 'Hide';
+  hideBtn.addEventListener('click', () => {
+    showCheckbox.checked = false;
+    saveToLocal();
+    ws.send(JSON.stringify({ type: 'update', data: overlayData }));
+    try {
+      updateToast = updateToast || new bootstrap.Toast(updateToastEl);
+      updateToast.show();
+    } catch {}
+  });
+  const deleteBtn = document.createElement('button');
+  deleteBtn.type = 'button';
+  deleteBtn.className = 'btn btn-sm btn-outline-danger';
+  deleteBtn.textContent = 'Delete';
+  deleteBtn.addEventListener('click', () => {
+    if (!window.confirm('Delete this streak?')) return;
     row.remove();
     saveToLocal();
   });
-  row.appendChild(delBtn);
+  streakFooter.appendChild(showBtn);
+  streakFooter.appendChild(hideBtn);
+  streakFooter.appendChild(deleteBtn);
+  row.appendChild(streakFooter);
 
   // Drag events
   row.addEventListener('dragstart', e => {
@@ -482,11 +620,16 @@ function addStreak(data = {}) {
   } else if (data.killer) {
     charSel.value = data.killer;
   }
-  countInput.value = data.count || 0;
-  recordInput.value = data.record ?? '';
-  recordLabel.value = data.recordLabel || '';
+  countInput.value = data.count !== undefined && data.count !== null ? String(data.count) : '';
+  const pairs = Array.isArray(data.recordPairs) && data.recordPairs.length > 0
+    ? data.recordPairs
+    : (data.record !== undefined || data.recordLabel) ? [{ label: data.recordLabel || '', value: data.record ?? null }] : [{ label: '', value: null }];
+  recordPairsContainer.querySelectorAll('.record-pair').forEach(el => el.remove());
+  pairs.forEach(p => addRecordPair({ label: p.label, value: p.value }));
+  if (pairs.length === 0) addRecordPair();
   showCheckbox.checked = data.show !== false;
   showImageCheckbox.checked = data.showImage === true;
+  countMarginCheckbox.checked = data.countMarginZero === true;
 
   charSel.addEventListener('change', () => {
     if (charSel.value === 'Survivor') {
@@ -502,11 +645,15 @@ function addStreak(data = {}) {
     saveToLocal();
   });
 
-  [survivorSel, otherInput, countInput, recordInput, recordLabel].forEach(el => {
-    el.addEventListener('input', saveToLocal);
+  [survivorSel, otherInput, countInput].forEach(el => {
+    el.addEventListener('input', () => {
+      if (el === countInput) updateIncrementButtonVisibility();
+      saveToLocal();
+    });
   });
   showCheckbox.addEventListener('change', saveToLocal);
   showImageCheckbox.addEventListener('change', saveToLocal);
+  countMarginCheckbox.addEventListener('change', saveToLocal);
 
   streakList.appendChild(row);
   // Ensure initial visibility matches current selection

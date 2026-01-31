@@ -5,21 +5,145 @@
     <title>Streak Dock</title>
     <style>
       #settings label { display: block; margin-bottom: 6px; }
-      .streak.dragging { opacity: 0.5; }
-      .streak .delete { margin-left: auto; }
-      /* Base streak row layout: wrap within the card (no horizontal scroll) */
-      .streak { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
       body { background-color: #121212; }
+
+      /* ---- Cards (Scoreboard, Streaks section, each streak) ---- */
+      .container .card {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,.12);
+        box-shadow: none;
+      }
+      .container .card-header {
+        background: transparent;
+        border-bottom-color: rgba(255,255,255,.12);
+      }
+
+      /* ---- Streak cards ---- */
+      .streak {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .streak.dragging { opacity: 0.5; }
+      .streak-section { width: 100%; }
+
+      /* Card header: identity + count + remove */
+      .streak-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5rem .75rem;
+        padding-bottom: .5rem;
+      }
+      .streak-header .streak-identity {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .5rem;
+      }
+      .streak-header .streak-count-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: .2rem;
+        flex-shrink: 0;
+      }
+      .streak-header .count-input {
+        width: 4.5rem;
+        min-width: 4.5rem;
+        text-align: center;
+        font-size: 1.125rem;
+        font-weight: 600;
+      }
+      .streak-header .form-control,
+      .streak-header .form-select { box-shadow: none; }
+      .streak-header .form-control:focus,
+      .streak-header .form-select:focus { box-shadow: none; outline: none; }
+
+      /* Count input group: single border, no inner gap */
+      .streak-header .streak-count-wrap .input-group {
+        border: 1px solid var(--bs-border-color);
+        border-radius: var(--bs-border-radius);
+        overflow: hidden;
+        background: var(--bs-input-bg, var(--bs-body-bg));
+      }
+      .streak-header .streak-count-wrap .input-group .form-control {
+        border: none;
+        box-shadow: none;
+        outline: none;
+        background: transparent;
+      }
+      .streak-header .streak-count-wrap .input-group .form-control:focus {
+        box-shadow: none;
+        outline: none;
+      }
+      .streak-header .streak-count-wrap .input-group .input-group-text {
+        border: none;
+        background: transparent;
+      }
+
+      /* Collapsible: Display options, Records */
+      .streak-details { margin-top: .5rem; }
+      .streak-details summary {
+        font-size: .8rem;
+        color: var(--bs-secondary-color);
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: .25rem;
+      }
+      .streak-details summary::-webkit-details-marker { display: none; }
+      .streak-details summary::before {
+        content: '▸';
+        font-size: .65rem;
+        transition: transform .15s;
+      }
+      .streak-details[open] summary::before { transform: rotate(90deg); }
+      .streak-details .streak-details-body {
+        padding-top: .5rem;
+        padding-left: .25rem;
+      }
+      .streak-options-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: .75rem 1rem;
+        font-size: .8125rem;
+        color: var(--bs-secondary-color);
+      }
+      .streak-options-row .form-check-input { width: 1.5em; height: .75rem; }
+      .streak-options-row .form-check-label { font-size: inherit; color: inherit; }
+      .streak-records-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        margin-bottom: .5rem;
+      }
+      .streak-records-list + .btn { font-size: .8125rem; }
+
+      /* Card footer: Show, Hide, Delete */
+      .streak-footer {
+        display: flex;
+        gap: .35rem;
+        margin-top: .5rem;
+        padding-top: .5rem;
+        border-top: 1px solid rgba(255,255,255,.08);
+        width: 100%;
+      }
+      .streak-footer .btn { flex: 1; }
+      .streak-footer .btn-outline-danger { flex: 0.6; }
     </style>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
       /* Ensure our layout wins over Bootstrap defaults */
       .streak.streak {
         display: flex !important;
-        flex-direction: row !important;
+        flex-direction: column !important;
         flex-wrap: wrap !important;
-        align-items: center !important;
-        gap: .5rem !important;
+        align-items: stretch !important;
+        gap: .75rem !important;
       }
       .streak .form-select { width: auto !important; }
       .streak .form-floating > label { font-size: .875rem; }
