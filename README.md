@@ -39,11 +39,11 @@ Set up streaks in the dock under the **Streaks** section.
     - If you select a **Survivor**, the streak name defaults to _Survivor_ unless you enter a custom name.
     - If you select **Other**, enter a custom name.
 
-2. Turn on **Show on stream** to display the streak in the overlay.
+2. Select **Show** to show the streak in the overlay. Select **Hide** to hide it.
 3. For Killer and Survivor characters, turn on **Show image** to display the character portrait.
-4. (Optional) In **Record/Target label**, enter a label for the badge, such as WR or PB.
+4. (Optional) In **Record/Target label**, enter a label for a badge, such as WR or PB.
 5. (Optional) In **Record/Target value**, enter a target or record value.
-6. Select + to increase the streak value by one. If the streak value matches the target value, the target value also increases by one.
+6. If your streak value is set to a number (e.g. "4") or a fraction (e.g. "1/42"), select + to increase the streak value by one. If the streak value matches a target value, the target value also increases by one.
 
 To reorder streaks, drag a streak to a new position.
 
