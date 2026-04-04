@@ -16,7 +16,7 @@ A tool for Dead by Daylight streamers to create and manage winstreak and scorebo
 
 **Streak Overlay for Dead by Daylight** is available for Windows 11.
 
-1. Download the [latest release](https://github.com/superdazed/dbd-streak-overlay/releases/latest).
+1. Download the [app](https://github.com/superdazed/dbd-streak-overlay/releases/download/v0.4.0/dbd-streak-overlay-setup-0.4.0.exe).
 2. If your browser warns that the app isn’t commonly downloaded, select More options (three dots), then select Keep.
 3. If Microsoft Defender SmartScreen appears, select the arrow next to Delete, then select Keep anyway.
 4. Open the installer and follow the on-screen instructions.
