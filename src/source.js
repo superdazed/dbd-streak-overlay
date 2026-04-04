@@ -111,6 +111,17 @@ function loadFont(font) {
 
 let currentOverlayData = null;
 let timerUpdateInterval = null;
+let setsCarouselTimer = null;
+let setsAnimToken = 0;
+
+function normalizeSetItemOverlay(raw) {
+  const d = raw && typeof raw === 'object' ? raw : {};
+  return {
+    killer: d.killer !== undefined && d.killer !== null ? String(d.killer).trim() : '',
+    teamPlayingFirst: d.teamPlayingFirst !== undefined && d.teamPlayingFirst !== null ? String(d.teamPlayingFirst).trim() : '',
+    winner: d.winner !== undefined && d.winner !== null ? String(d.winner).trim() : ''
+  };
+}
 
 ws.addEventListener('message', ev => {
   const data = JSON.parse(ev.data);
@@ -189,6 +200,11 @@ function updateTimerInterval() {
 
 function render(overlay) {
   if (!overlay) return;
+  if (setsCarouselTimer) {
+    clearInterval(setsCarouselTimer);
+    setsCarouselTimer = null;
+  }
+  setsAnimToken++;
   display.innerHTML = '';
   loadFont(overlay.settings.fontFace || 'Roboto');
   const inv = inverseColor(overlay.settings.fontColor || '#ffffff');
@@ -480,9 +496,20 @@ function render(overlay) {
       row.appendChild(avatar);
     }
 
-    // Content column: label + count on first line, badges directly below
+    // Content column: optional title, label + count, badges
     const contentCol = document.createElement('div');
     contentCol.className = 'streak-content';
+
+    const titleStr = s.title !== undefined && s.title !== null ? String(s.title).trim() : '';
+    if (titleStr) {
+      const titleEl = document.createElement('div');
+      titleEl.className = 'streak-overlay-title';
+      titleEl.textContent = titleStr;
+      if (hasAnyAvatar && !hasAvatar) {
+        titleEl.style.marginLeft = `${avatarWidth}px`;
+      }
+      contentCol.appendChild(titleEl);
+    }
 
     const textRow = document.createElement('div');
     textRow.className = 'streak-text';
@@ -513,17 +540,14 @@ function render(overlay) {
     countArea.appendChild(countText);
     textRow.appendChild(countArea);
 
-    contentCol.appendChild(textRow);
-
     const pairs = Array.isArray(s.recordPairs) && s.recordPairs.length > 0
       ? s.recordPairs
       : (s.record != null || s.recordLabel) ? [{ label: s.recordLabel || '', value: s.record }] : [];
-    if (pairs.some(p => p.label || (p.value !== undefined && p.value !== null && p.value !== ''))) {
-      const badgesRow = document.createElement('div');
+    const hasBadges = pairs.some(p => p.label || (p.value !== undefined && p.value !== null && p.value !== ''));
+    let badgesRow = null;
+    if (hasBadges) {
+      badgesRow = document.createElement('div');
       badgesRow.className = 'streak-badges';
-      if (hasAnyAvatar && !hasAvatar) {
-        badgesRow.style.marginLeft = `${avatarWidth}px`;
-      }
       pairs.forEach(p => {
         if (p.label || (p.value !== undefined && p.value !== null && p.value !== '')) {
           const badge = document.createElement('span');
@@ -532,6 +556,16 @@ function render(overlay) {
           badgesRow.appendChild(badge);
         }
       });
+      if (!hasAvatar) {
+        textRow.classList.add('streak-text-inline-badges');
+        badgesRow.classList.add('streak-badges-inline');
+        textRow.appendChild(badgesRow);
+      }
+    }
+
+    contentCol.appendChild(textRow);
+
+    if (hasBadges && hasAvatar && badgesRow) {
       contentCol.appendChild(badgesRow);
     }
 
@@ -539,4 +573,83 @@ function render(overlay) {
     block.appendChild(row);
     display.appendChild(block);
   });
+
+  const setsCfg = overlay.sets && typeof overlay.sets === 'object' ? overlay.sets : {};
+  const setsShow = setsCfg.show === true;
+  const rawSetItems = Array.isArray(setsCfg.items) ? setsCfg.items : [];
+  const setItems = rawSetItems.map(normalizeSetItemOverlay);
+  if (setsShow && setItems.length > 0) {
+    const root = document.createElement('div');
+    root.className = 'sets-overlay';
+    const inner = document.createElement('div');
+    inner.className = 'sets-inner';
+    root.appendChild(inner);
+    display.appendChild(root);
+
+    const fadeMs = 450;
+    const holdMs = 14000;
+    const tokenAtStart = setsAnimToken;
+
+    function fillSetSlide(item, orderIndex) {
+      inner.replaceChildren();
+      const killerCol = document.createElement('div');
+      killerCol.className = 'sets-killer-col';
+      const img = document.createElement('img');
+      img.src = createImageUrl('killer', item.killer);
+      img.alt = item.killer || 'Killer';
+      killerCol.appendChild(img);
+
+      const textCol = document.createElement('div');
+      textCol.className = 'sets-text-col';
+
+      const titleEl = document.createElement('div');
+      titleEl.className = 'sets-title-line';
+      titleEl.textContent = `Set ${orderIndex + 1}`;
+
+      const nameEl = document.createElement('div');
+      nameEl.className = 'sets-killer-name';
+      nameEl.textContent = item.killer || '';
+
+      textCol.appendChild(titleEl);
+      textCol.appendChild(nameEl);
+
+      if (item.winner || item.teamPlayingFirst) {
+        const badgesRow = document.createElement('div');
+        badgesRow.className = 'streak-badges';
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        if (item.winner) {
+          badge.innerHTML = `<b>${item.winner}</b> Won`;
+        } else {
+          badge.innerHTML = `<b>${item.teamPlayingFirst}</b> Plays First`;
+        }
+        badgesRow.appendChild(badge);
+        textCol.appendChild(badgesRow);
+      }
+
+      inner.appendChild(killerCol);
+      inner.appendChild(textCol);
+    }
+
+    let idx = 0;
+    fillSetSlide(setItems[idx], idx);
+
+    if (setItems.length > 1) {
+      setsCarouselTimer = setInterval(() => {
+        if (tokenAtStart !== setsAnimToken) {
+          if (setsCarouselTimer) clearInterval(setsCarouselTimer);
+          setsCarouselTimer = null;
+          return;
+        }
+        inner.style.opacity = '0';
+        const t = tokenAtStart;
+        setTimeout(() => {
+          if (t !== setsAnimToken) return;
+          idx = (idx + 1) % setItems.length;
+          fillSetSlide(setItems[idx], idx);
+          inner.style.opacity = '1';
+        }, fadeMs);
+      }, holdMs + fadeMs);
+    }
+  }
 }

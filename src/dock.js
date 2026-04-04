@@ -15,10 +15,12 @@ function normalizeCharacterData(raw) {
   result.survivors = normalizeList(survivorSource);
   return result;
 }
-let overlayData = { settings: {}, streaks: [] };
+let overlayData = { settings: {}, streaks: [], sets: { show: false, items: [] } };
 let isLoading = false; // Flag to prevent saving during load
 
 const streakList = document.getElementById('streak-list');
+const setList = document.getElementById('set-list');
+const addSetBtn = document.getElementById('add-set');
 const addBtn = document.getElementById('add-streak');
 const updateBtn = document.getElementById('update-overlay');
 const resetBtn = document.getElementById('reset-all');
@@ -78,7 +80,17 @@ function defaultOverlay() {
         fontSize: 16,
         iconImage: null
       }
-    }
+    },
+    sets: { show: false, items: [] }
+  };
+}
+
+function normalizeSetItem(raw) {
+  const d = raw && typeof raw === 'object' ? raw : {};
+  return {
+    killer: d.killer !== undefined && d.killer !== null ? String(d.killer) : '',
+    teamPlayingFirst: d.teamPlayingFirst !== undefined && d.teamPlayingFirst !== null ? String(d.teamPlayingFirst) : '',
+    winner: d.winner !== undefined && d.winner !== null ? String(d.winner) : ''
   };
 }
 
@@ -122,7 +134,13 @@ function loadFromLocal() {
         borderRadius: parsed.scoreboard.design.borderRadius !== undefined ? parsed.scoreboard.design.borderRadius : defaults.scoreboard.design.borderRadius,
         fontSize: parsed.scoreboard.design.fontSize !== undefined ? parsed.scoreboard.design.fontSize : defaults.scoreboard.design.fontSize
       } : defaults.scoreboard.design
-    } : defaults.scoreboard
+    } : defaults.scoreboard,
+    sets: parsed && parsed.sets && typeof parsed.sets === 'object' ? {
+      show: parsed.sets.show === true,
+      items: Array.isArray(parsed.sets.items)
+        ? parsed.sets.items.map(normalizeSetItem)
+        : defaults.sets.items
+    } : defaults.sets
   };
   fontFaceSel.value = overlayData.settings.fontFace;
   fontSizeInput.value = overlayData.settings.fontSize;
@@ -130,6 +148,13 @@ function loadFromLocal() {
   if (overlayCornerSel) overlayCornerSel.value = overlayData.settings.overlayCorner || 'top-left';
   if (overlayPaddingInput) overlayPaddingInput.value = overlayData.settings.overlayPadding !== undefined ? overlayData.settings.overlayPadding : 0;
   (overlayData.streaks || []).forEach(s => addStreak(s));
+
+  const setsShowInput = document.getElementById('sets-show');
+  if (setsShowInput) setsShowInput.checked = overlayData.sets && overlayData.sets.show === true;
+  if (setList) {
+    while (setList.firstChild) setList.removeChild(setList.firstChild);
+    (overlayData.sets && Array.isArray(overlayData.sets.items) ? overlayData.sets.items : []).forEach(item => addSet(item));
+  }
   
   setTimeout(() => {
     updateFontPreview();
@@ -209,6 +234,7 @@ function saveToLocal() {
   const scoreboardBorderRadiusInput = document.getElementById('scoreboard-border-radius');
   const scoreboardFontSizeInput = document.getElementById('scoreboard-font-size');
   const scoreboardIconPreviewImg = document.getElementById('scoreboard-icon-preview-img');
+  const setsShowInput = document.getElementById('sets-show');
   
   let iconImage = null;
   if (scoreboardIconPreviewImg && scoreboardIconPreviewImg.src) {
@@ -260,12 +286,14 @@ function saveToLocal() {
         const value = val === '' || val === undefined ? null : Number(val);
         return { label, value };
       });
+      const titleInputEl = row.querySelector('.streak-title-input');
       return {
         type,
         killer: type === 'Killer' ? selected : '',
         survivor: survivorSel ? survivorSel.value : '',
         other: otherInput ? otherInput.value : '',
         displayLabel: type === 'Survivor' && otherInput ? otherInput.value : '',
+        title: titleInputEl ? titleInputEl.value : '',
         count: (row.querySelector('.count-input').value ?? '').trim(),
         recordPairs,
         show: !!(showCheckbox && showCheckbox.checked),
@@ -289,6 +317,21 @@ function saveToLocal() {
       team2StartTime: currentTeam2StartTime,
       winningTimer: currentWinningTimer,
       design: designSettings
+    },
+    sets: {
+      show: setsShowInput ? setsShowInput.checked : false,
+      items: setList
+        ? Array.from(setList.children).map(row => {
+            const killerSel = row.querySelector('.set-killer-select');
+            const teamFirstEl = row.querySelector('.set-team-first');
+            const winnerEl = row.querySelector('.set-winner');
+            return {
+              killer: killerSel ? killerSel.value : '',
+              teamPlayingFirst: teamFirstEl ? teamFirstEl.value : '',
+              winner: winnerEl ? winnerEl.value : ''
+            };
+          })
+        : []
     }
   };
   localStorage.setItem('overlayData', JSON.stringify(overlayData));
@@ -302,6 +345,21 @@ function addStreak(data = {}) {
   row.style.alignItems = 'center';
   row.style.gap = '.5rem';
   row.draggable = true;
+  row.title = 'Drag to reorder on the overlay';
+
+  const titleRow = document.createElement('div');
+  titleRow.className = 'streak-title-row streak-section w-100';
+  const titleWrap = document.createElement('div');
+  titleWrap.className = 'form-floating';
+  const titleInput = document.createElement('input');
+  titleInput.type = 'text';
+  titleInput.className = 'streak-title-input form-control';
+  titleInput.placeholder = 'Overlay title (optional)';
+  const titleLbl = document.createElement('label');
+  titleLbl.textContent = 'Title';
+  titleWrap.appendChild(titleInput);
+  titleWrap.appendChild(titleLbl);
+  titleRow.appendChild(titleWrap);
 
   const charWrap = document.createElement('div');
   charWrap.className = 'form-floating';
@@ -472,6 +530,7 @@ function addStreak(data = {}) {
   streakHeader.className = 'streak-section streak-header';
   streakHeader.appendChild(streakIdentity);
   streakHeader.appendChild(streakCountWrap);
+  row.appendChild(titleRow);
   row.appendChild(streakHeader);
 
   const detailsDisplay = document.createElement('details');
@@ -620,6 +679,7 @@ function addStreak(data = {}) {
   } else if (data.killer) {
     charSel.value = data.killer;
   }
+  titleInput.value = data.title !== undefined && data.title !== null ? String(data.title) : '';
   countInput.value = data.count !== undefined && data.count !== null ? String(data.count) : '';
   const pairs = Array.isArray(data.recordPairs) && data.recordPairs.length > 0
     ? data.recordPairs
@@ -645,7 +705,7 @@ function addStreak(data = {}) {
     saveToLocal();
   });
 
-  [survivorSel, otherInput, countInput].forEach(el => {
+  [survivorSel, otherInput, countInput, titleInput].forEach(el => {
     el.addEventListener('input', () => {
       if (el === countInput) updateIncrementButtonVisibility();
       saveToLocal();
@@ -660,8 +720,107 @@ function addStreak(data = {}) {
   charSel.dispatchEvent(new Event('change'));
 }
 
+function addSet(data = {}) {
+  const norm = normalizeSetItem(data);
+  const row = document.createElement('div');
+  row.className = 'set-row card p-2 mb-2 d-flex flex-row flex-wrap align-items-end gap-2';
+  row.draggable = true;
+  row.title = 'Drag to reorder on the overlay';
+
+  const killerWrap = document.createElement('div');
+  killerWrap.className = 'form-floating flex-grow-1';
+  killerWrap.style.minWidth = '140px';
+  const killerSel = document.createElement('select');
+  killerSel.className = 'set-killer-select form-select';
+  const kPlaceholder = document.createElement('option');
+  kPlaceholder.value = '';
+  kPlaceholder.textContent = ' ';
+  kPlaceholder.disabled = true;
+  kPlaceholder.hidden = true;
+  kPlaceholder.selected = true;
+  killerSel.appendChild(kPlaceholder);
+  (characters.killers || []).forEach(k => {
+    const opt = document.createElement('option');
+    opt.value = k;
+    opt.textContent = k;
+    killerSel.appendChild(opt);
+  });
+  const killerLbl = document.createElement('label');
+  killerLbl.textContent = 'Killer';
+  killerWrap.appendChild(killerSel);
+  killerWrap.appendChild(killerLbl);
+
+  const teamWrap = document.createElement('div');
+  teamWrap.className = 'form-floating flex-grow-1';
+  teamWrap.style.minWidth = '120px';
+  const teamInput = document.createElement('input');
+  teamInput.type = 'text';
+  teamInput.className = 'set-team-first form-control';
+  teamInput.placeholder = 'Team first';
+  const teamLbl = document.createElement('label');
+  teamLbl.textContent = 'Team Playing First';
+  teamWrap.appendChild(teamInput);
+  teamWrap.appendChild(teamLbl);
+
+  const winnerWrap = document.createElement('div');
+  winnerWrap.className = 'form-floating flex-grow-1';
+  winnerWrap.style.minWidth = '120px';
+  const winnerInput = document.createElement('input');
+  winnerInput.type = 'text';
+  winnerInput.className = 'set-winner form-control';
+  winnerInput.placeholder = 'Winner';
+  const winnerLbl = document.createElement('label');
+  winnerLbl.textContent = 'Winner';
+  winnerWrap.appendChild(winnerInput);
+  winnerWrap.appendChild(winnerLbl);
+
+  const delBtn = document.createElement('button');
+  delBtn.type = 'button';
+  delBtn.className = 'btn btn-sm btn-outline-danger';
+  delBtn.textContent = 'Remove';
+  delBtn.addEventListener('click', () => {
+    row.remove();
+    saveToLocal();
+  });
+
+  row.appendChild(killerWrap);
+  row.appendChild(teamWrap);
+  row.appendChild(winnerWrap);
+  row.appendChild(delBtn);
+
+  killerSel.value = norm.killer && (characters.killers || []).includes(norm.killer) ? norm.killer : '';
+  teamInput.value = norm.teamPlayingFirst;
+  winnerInput.value = norm.winner;
+
+  row.addEventListener('dragstart', e => {
+    row.classList.add('dragging');
+    e.dataTransfer.setData('text/plain', '');
+  });
+  row.addEventListener('dragend', () => row.classList.remove('dragging'));
+
+  [killerSel, teamInput, winnerInput].forEach(el => {
+    el.addEventListener('input', saveToLocal);
+    el.addEventListener('change', saveToLocal);
+  });
+
+  if (setList) setList.appendChild(row);
+}
+
 function getDragAfterElement(container, y) {
   const draggableElements = [...container.querySelectorAll('.streak:not(.dragging)')];
+  return draggableElements.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    if (offset < 0 && offset > closest.offset) {
+      return { offset: offset, element: child };
+    } else {
+      return closest;
+    }
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+function getDragAfterSetElement(container, y) {
+  const draggableElements = [...container.querySelectorAll('.set-row:not(.dragging)')];
   return draggableElements.reduce((closest, child) => {
     const box = child.getBoundingClientRect();
     const offset = y - box.top - box.height / 2;
@@ -693,6 +852,7 @@ resetBtn.addEventListener('click', () => {
   localStorage.removeItem('overlayData');
   // Clear UI
   while (streakList.firstChild) streakList.removeChild(streakList.firstChild);
+  if (setList) while (setList.firstChild) setList.removeChild(setList.firstChild);
   // Reset inputs to defaults
   const defaults = defaultOverlay();
   fontFaceSel.value = defaults.settings.fontFace;
@@ -735,6 +895,8 @@ resetBtn.addEventListener('click', () => {
   if (scoreboardIconUploadInput) scoreboardIconUploadInput.value = '';
   if (scoreboardIconPreviewImg) scoreboardIconPreviewImg.src = '';
   if (scoreboardIconPreview) scoreboardIconPreview.style.display = 'none';
+  const setsShowInputReset = document.getElementById('sets-show');
+  if (setsShowInputReset) setsShowInputReset.checked = defaults.sets.show === true;
   overlayData = defaults;
   saveToLocal();
   ws.send(JSON.stringify({ type: 'update', data: overlayData }));
@@ -1168,6 +1330,36 @@ streakList.addEventListener('dragover', e => {
 streakList.addEventListener('drop', () => {
   saveToLocal();
 });
+
+if (addSetBtn) {
+  addSetBtn.addEventListener('click', () => {
+    addSet();
+    saveToLocal();
+  });
+}
+
+const setsShowInputDock = document.getElementById('sets-show');
+if (setsShowInputDock) {
+  setsShowInputDock.addEventListener('change', () => {
+    saveToLocal();
+    ws.send(JSON.stringify({ type: 'update', data: overlayData }));
+  });
+}
+
+if (setList) {
+  setList.addEventListener('dragover', e => {
+    e.preventDefault();
+    const dragging = document.querySelector('.set-row.dragging');
+    const after = getDragAfterSetElement(setList, e.clientY);
+    if (dragging) {
+      if (after == null) setList.appendChild(dragging);
+      else setList.insertBefore(dragging, after);
+    }
+  });
+  setList.addEventListener('drop', () => {
+    saveToLocal();
+  });
+}
 
 ws.addEventListener('message', ev => {
   const msg = JSON.parse(ev.data);
