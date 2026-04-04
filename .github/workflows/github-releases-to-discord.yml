@@ -34,11 +34,11 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' }}
         uses: SethCohen/github-releases-to-discord@v1.20.0
         with:
-          webhook-url: ${{ secrets.WEBHOOK_URL }}
+          webhook_url: ${{ secrets.WEBHOOK_URL }}
           username: "Overlay Bot"
-          avatar-url: "https://cdn.discordapp.com/avatars/1459443855035207793/7c9cfca0e4c4516b30ee9ae695910df9.webp"
+          avatar_url: "https://cdn.discordapp.com/avatars/1459443855035207793/7c9cfca0e4c4516b30ee9ae695910df9.webp"
           content: "@Notifications A new version of Streak Overlay for Dead by Daylight has been released."
+          reduce_headings: true
           release_name: ${{ inputs.release_name }}
           release_body: ${{ inputs.release_body }}
           release_html_url: ${{ inputs.release_html_url }}
-          reduce_headings: true
