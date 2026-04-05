@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 125%;
+}
+
 html,
 body {
   margin: 0;
@@ -14,7 +18,7 @@ body {
 .site {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: minmax(370px, 43%) 1fr;
+  grid-template-columns: minmax(23.125rem, 43%) 1fr;
 }
 
 .left {
@@ -34,12 +38,27 @@ body {
 }
 
 .logo {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
   color: #ffffff;
   text-decoration: none;
   font-weight: 600;
   letter-spacing: 0.01em;
   margin-bottom: 2.5rem;
+}
+
+.logo-img {
+  display: block;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  object-fit: contain;
+  border-radius: 0.5rem;
+}
+
+.logo-text {
+  line-height: 1.2;
 }
 
 h1 {
@@ -61,11 +80,41 @@ h1 span {
   line-height: 1.6;
 }
 
-.hero-actions {
+.hero-cta {
   margin-top: 1.5rem;
+}
+
+.hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.9rem;
+}
+
+.download-hint {
+  margin: 0.85rem 0 0;
+  max-width: 28rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #94a3b8;
+}
+
+.download-hint a {
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-decoration-color: rgba(125, 211, 252, 0.55);
+  text-underline-offset: 0.12em;
+  transition: color 120ms ease, text-decoration-color 120ms ease;
+}
+
+.download-hint a:hover {
+  color: #e0f2fe;
+  text-decoration-color: rgba(224, 242, 254, 0.85);
+}
+
+.download-hint a:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 .action-button {
@@ -297,7 +346,7 @@ kbd {
   color: #e2e8f0;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1375px) {
   .site {
     grid-template-columns: 1fr;
   }
