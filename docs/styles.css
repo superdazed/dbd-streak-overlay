@@ -31,6 +31,25 @@ body {
   border-right: 1px solid rgba(248, 113, 113, 0.18);
 }
 
+.left .download-hint a, .left .byline a {
+  color: #7dd3fc;
+  text-decoration: underline;
+  text-decoration-color: rgba(125, 211, 252, 0.55);
+  text-underline-offset: 0.12em;
+  transition: color 120ms ease, text-decoration-color 120ms ease;
+}
+
+.left .download-hint a:hover, .left .byline a:hover {
+  color: #e0f2fe;
+  text-decoration-color: rgba(224, 242, 254, 0.85);
+}
+
+.left .download-hint a:focus-visible, .left .byline a:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .left-inner {
   max-width: 32rem;
   margin: 0 auto;
@@ -96,25 +115,6 @@ h1 span {
   font-size: 0.85rem;
   line-height: 1.5;
   color: #94a3b8;
-}
-
-.download-hint a {
-  color: #7dd3fc;
-  text-decoration: underline;
-  text-decoration-color: rgba(125, 211, 252, 0.55);
-  text-underline-offset: 0.12em;
-  transition: color 120ms ease, text-decoration-color 120ms ease;
-}
-
-.download-hint a:hover {
-  color: #e0f2fe;
-  text-decoration-color: rgba(224, 242, 254, 0.85);
-}
-
-.download-hint a:focus-visible {
-  outline: 2px solid #7dd3fc;
-  outline-offset: 2px;
-  border-radius: 2px;
 }
 
 .action-button {
